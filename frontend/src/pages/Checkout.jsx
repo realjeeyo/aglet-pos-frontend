@@ -1,7 +1,6 @@
-import React, { useState, useEffect } from 'react';
-import { FiShoppingCart, FiPlus, FiMinus, FiTrash2 } from 'react-icons/fi';
+import React, { useState, useEffect } from "react";
 
-const API_URL = 'http://localhost:3000/api';
+const API_URL = "http://localhost:3000/api";
 
 export default function Checkout() {
   const [shoes, setShoes] = useState([]);
@@ -20,7 +19,6 @@ export default function Checkout() {
       setShoes(data);
       setError(null);
     } catch (err) {
-      console.error('Error fetching shoes:', err);
       setError('Failed to load products');
     }
   };
@@ -71,23 +69,11 @@ export default function Checkout() {
 
   const removeFromCart = (shoeId) => {
     setCart(cart.filter(item => item.shoeId !== shoeId));
-    setError(null);
   };
 
   const handleCheckout = async () => {
     if (cart.length === 0) {
       setError('Cart is empty');
-      return;
-    }
-
-    // Validate stock levels one final time
-    const stockError = cart.some(item => {
-      const shoe = shoes.find(s => s.id === item.shoeId);
-      return item.quantity > shoe.currentStock;
-    });
-
-    if (stockError) {
-      setError('Some items exceed available stock');
       return;
     }
 
@@ -101,19 +87,19 @@ export default function Checkout() {
 
       if (!res.ok) throw new Error('Checkout failed');
 
-      await fetchShoes(); // Refresh stock levels
+      await fetchShoes();
       setCart([]);
       setError(null);
       alert('Sale completed successfully!');
     } catch (err) {
-      console.error('Error during checkout:', err);
       setError(err.message);
     } finally {
       setLoading(false);
     }
   };
 
-  const total = cart.reduce((sum, item) => sum + (item.quantity * item.price), 0);
+  if (loading) return <div>Loading...</div>;
+  if (error) return <div>Error: {error}</div>;
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -137,7 +123,6 @@ export default function Checkout() {
                     disabled={shoe.currentStock < 1 || loading}
                     className="mt-4 w-full inline-flex items-center justify-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:bg-gray-300 disabled:cursor-not-allowed"
                   >
-                    <FiPlus className="mr-2 -ml-1 h-4 w-4" />
                     Add to Cart
                   </button>
                 </div>
@@ -151,7 +136,6 @@ export default function Checkout() {
           <div className="bg-white rounded-lg shadow-sm p-6 sticky top-8">
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-2xl font-bold text-gray-900">Cart</h2>
-              <FiShoppingCart className="h-6 w-6 text-gray-400" />
             </div>
 
             {cart.length === 0 ? (
@@ -170,7 +154,7 @@ export default function Checkout() {
                           onClick={() => updateQuantity(item.shoeId, Math.max(1, item.quantity - 1))}
                           className="p-1 rounded-full hover:bg-gray-100"
                         >
-                          <FiMinus className="h-4 w-4" />
+                          -
                         </button>
                         <input
                           type="number"
@@ -184,13 +168,13 @@ export default function Checkout() {
                           onClick={() => updateQuantity(item.shoeId, Math.min(item.maxStock, item.quantity + 1))}
                           className="p-1 rounded-full hover:bg-gray-100"
                         >
-                          <FiPlus className="h-4 w-4" />
+                          +
                         </button>
                         <button
                           onClick={() => removeFromCart(item.shoeId)}
                           className="p-1 text-red-600 hover:bg-red-50 rounded-full"
                         >
-                          <FiTrash2 className="h-4 w-4" />
+                          Remove
                         </button>
                       </div>
                     </div>
@@ -200,7 +184,7 @@ export default function Checkout() {
                 <div className="border-t pt-4">
                   <div className="flex justify-between items-center text-lg font-bold mb-6">
                     <span>Total:</span>
-                    <span>₱{total.toFixed(2)}</span>
+                    <span>₱{cart.reduce((sum, item) => sum + (item.quantity * item.price), 0).toFixed(2)}</span>
                   </div>
                   <button
                     onClick={handleCheckout}
