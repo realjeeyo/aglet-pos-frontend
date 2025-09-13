@@ -37,94 +37,110 @@ export default function Dashboard() {
     }).format(amount);
 
   if (loading) {
-    return <div>Loading...</div>;
+    return (
+      <div className="dashboard-wrapper">
+        <div className="flex-center">Loading...</div>
+      </div>
+    );
   }
 
   if (error) {
-    return <div>Error: {error}</div>;
+    return (
+      <div className="dashboard-wrapper">
+        <div className="flex-center" style={{ color: "var(--error)" }}>
+          Error: {error}
+        </div>
+      </div>
+    );
   }
 
   return (
-    <div>
-      <h1>Dashboard Overview</h1>
-
-      <div>
-        {/* Total Sales */}
-        <div>
-          <div>
-            <div>
-              <p>Total Sales</p>
-              <p>{formatCurrency(stats.totalSales)}</p>
-            </div>
+    <div className="dashboard-wrapper">
+      <div className="dashboard-container">
+        <div className="dashboard-header">
+          <h1 className="dashboard-title">Dashboard Overview</h1>
+          <div className="dashboard-date">
+            {new Date().toLocaleDateString("en-US", {
+              weekday: "long",
+              year: "numeric",
+              month: "long",
+              day: "numeric",
+            })}
           </div>
         </div>
 
-        {/* Revenue */}
-        <div>
-          <div>
-            <div>
-              <p>Revenue</p>
-              <p>{formatCurrency(stats.revenue)}</p>
-            </div>
+        <div className="stats-grid">
+          <div className="stat-card">
+            <p className="stat-label">Total Sales</p>
+            <p className="stat-value">{formatCurrency(stats.totalSales)}</p>
+          </div>
+
+          <div className="stat-card">
+            <p className="stat-label">Revenue</p>
+            <p className="stat-value">{formatCurrency(stats.revenue)}</p>
+          </div>
+
+          <div className="stat-card">
+            <p className="stat-label">Top Product</p>
+            {stats.topProduct ? (
+              <div>
+                <p className="stat-value">{stats.topProduct.brand}</p>
+                <p className="stat-label">{stats.topProduct.model}</p>
+                <p className="stat-highlight">
+                  {stats.topProduct.totalSold} units sold
+                </p>
+              </div>
+            ) : (
+              <p className="stat-label">No data available</p>
+            )}
           </div>
         </div>
 
-        {/* Top Product */}
-        <div>
-          <div>
-            <div>
-              <p>Top Product</p>
-              {stats.topProduct ? (
-                <div>
-                  <p>{stats.topProduct.brand}</p>
-                  <p>{stats.topProduct.model}</p>
-                  <p>{stats.topProduct.totalSold} units sold</p>
-                </div>
-              ) : (
-                <p>No data</p>
-              )}
-            </div>
+        <div className="transactions-container">
+          <div className="transactions-header">
+            <h2>Recent Transactions</h2>
           </div>
-        </div>
-      </div>
-
-      {/* Recent Transactions */}
-      <div>
-        <div>
-          <h2>Recent Transactions</h2>
-        </div>
-        {stats.recentTransactions.length === 0 ? (
-          <p>No transactions available</p>
-        ) : (
-          <table>
-            <thead>
-              <tr>
-                <th>Transaction ID</th>
-                <th>Date</th>
-                <th>Items</th>
-                <th>Total</th>
-              </tr>
-            </thead>
-            <tbody>
-              {stats.recentTransactions.map((t) => (
-                <tr key={t.id}>
-                  <td>#{t.id}</td>
-                  <td>{new Date(t.transactionDateTime).toLocaleString()}</td>
-                  <td>
-                    <div>
-                      {t.details.map((d) => (
-                        <div key={d.id}>
-                          {d.quantity}x {d.Shoe.brand} {d.Shoe.model}
+          {stats.recentTransactions.length === 0 ? (
+            <div className="transactions-empty">
+              <p>No transactions available</p>
+            </div>
+          ) : (
+            <div className="transactions-table-wrapper">
+              <table className="transactions-table">
+                <thead>
+                  <tr>
+                    <th>ID</th>
+                    <th>Date</th>
+                    <th>Items</th>
+                    <th style={{ textAlign: "right" }}>Total</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {stats.recentTransactions.map((t) => (
+                    <tr key={t.id}>
+                      <td>#{t.id}</td>
+                      <td>{new Date(t.transactionDateTime).toLocaleString()}</td>
+                      <td>
+                        <div className="transaction-items">
+                          {t.details.map((d) => (
+                            <div key={d.id} className="transaction-item">
+                              {d.quantity}x {d.Shoe.brand} {d.Shoe.model}
+                            </div>
+                          ))}
                         </div>
-                      ))}
-                    </div>
-                  </td>
-                  <td>{formatCurrency(t.totalAmount)}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        )}
+                      </td>
+                      <td style={{ textAlign: "right" }}>
+                        <span className="amount">
+                          {formatCurrency(t.totalAmount)}
+                        </span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

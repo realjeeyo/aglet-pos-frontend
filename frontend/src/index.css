@@ -1,16 +1,206 @@
-/* Tailwind directives */
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+:root {
+  /* Dark theme colors with new accent colors */
+  --primary: #000000;    /* Pure black for sidebar */
+  --background: linear-gradient(135deg, #1a1a1a 0%, #000000 100%);  /* Dark gradient */
+  --surface: #1a1a1a;    /* Slightly lighter black for cards */
+  --surface-gradient: linear-gradient(135deg, #262626 0%, #1a1a1a 100%);
+  --surface-hover: #333333;
+  --text-primary: #ffffff;
+  --text-secondary: #999999;
+  
+  /* New accent colors */
+  --accent: #ffd700;     /* Bright yellow */
+  --accent-gradient: linear-gradient(135deg, #ffd700 0%, #ffb700 100%);
+  --accent-hover: #ffb700;
+  
+  /* Status colors */
+  --success-gradient: linear-gradient(135deg, #ffd700 0%, #ffb700 100%); /* Yellow success */
+  --error-gradient: linear-gradient(135deg, #ff3b3b 0%, #dc2626 100%);   /* Bright red error */
+  
+  /* Shadows with new color scheme */
+  --card-shadow: 0 4px 6px -1px rgba(255, 215, 0, 0.1), 0 2px 4px -1px rgba(255, 215, 0, 0.06);
+  --card-shadow-hover: 0 10px 15px -3px rgba(255, 215, 0, 0.15), 0 4px 6px -2px rgba(255, 215, 0, 0.1);
+}
 
-/* Reset any browser default styles */
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
 }
 
-/* Set base font */
 body {
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  background: var(--background);
+  color: var(--text-primary);
+  min-height: 100vh;
+}
+
+/* Dashboard styles */
+.dashboard-wrapper {
+  padding: 1.5rem;
+  min-height: 100vh;
+}
+
+.dashboard-container {
+  max-width: 1280px;
+  margin: 0 auto;
+  background: var(--surface-gradient);
+  border-radius: 1rem;
+  padding: 2rem;
+  box-shadow: var(--card-shadow);
+}
+
+.dashboard-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+}
+
+.dashboard-title {
+  font-size: 1.875rem;
+  font-weight: 600;
+  background: var(--accent-gradient);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.stat-card {
+  background: var(--surface-gradient);
+  border-radius: 1rem;
+  padding: 1.5rem;
+  box-shadow: var(--card-shadow);
+  transition: all 0.3s ease;
+  border: 1px solid rgba(255, 215, 0, 0.1);  /* Subtle yellow border */
+}
+
+.stat-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--card-shadow-hover);
+  border-color: rgba(255, 215, 0, 0.2);  /* Brighter yellow border on hover */
+}
+
+.stat-label {
+  color: var(--text-secondary);
+  font-size: 0.875rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.stat-value {
+  color: var(--text-primary);
+  font-size: 2rem;
+  font-weight: 700;
+  margin-top: 0.5rem;
+  background: var(--accent-gradient);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.amount {
+  color: var(--accent);
+  font-weight: 600;
+}
+
+.transactions-container {
+  background: var(--surface-gradient);
+  border-radius: 1rem;
+  box-shadow: var(--card-shadow);
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.transactions-header {
+  padding: 1.5rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.transactions-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+}
+
+.transactions-table th {
+  background: var(--primary);
+  border-bottom: 2px solid var(--accent);  /* Yellow accent line */
+  padding: 1rem 1.5rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  font-size: 0.75rem;
+  letter-spacing: 0.05em;
+}
+
+.transactions-table td {
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.transactions-table tr:hover td {
+  background-color: var(--surface-hover);
+  border-bottom: 1px solid var(--accent);  /* Yellow accent on hover */
+}
+
+/* Form styles */
+input:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px rgba(255, 215, 0, 0.2);
+}
+
+button:hover {
+  transform: translateY(-1px);
+}
+
+button:active {
+  transform: translateY(0);
+}
+
+/* Add smooth transitions */
+input, button {
+  transition: all 0.2s ease;
+}
+
+/* Disable arrows on number inputs */
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+input[type="number"] {
+  -moz-appearance: textfield;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .dashboard-wrapper {
+    padding: 1rem;
+  }
+
+  .dashboard-container {
+    padding: 1.5rem;
+  }
+
+  .stats-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .transactions-table {
+    display: block;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+}
+
+/* Add this for error states */
+.error-text {
+  color: #ff3b3b;  /* Bright red for errors */
 }

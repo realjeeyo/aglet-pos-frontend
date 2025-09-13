@@ -98,61 +98,84 @@ export default function Checkout() {
     }
   };
 
-  if (loading) return <div>Loading...</div>;
-  if (error) return <div>Error: {error}</div>;
+  if (loading) return <div className="dashboard-wrapper">Loading...</div>;
+  if (error) return <div className="dashboard-wrapper" style={{ color: 'var(--error-gradient)' }}>Error: {error}</div>;
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <div className="flex flex-col lg:flex-row gap-8">
-        {/* Products Section */}
-        <div className="lg:w-2/3">
-          <h2 className="text-2xl font-bold text-gray-900 mb-6">Available Products</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-            {shoes.map(shoe => (
-              <div key={shoe.id} className="bg-white rounded-lg shadow-sm overflow-hidden">
-                <div className="p-6">
-                  <h3 className="text-lg font-semibold text-gray-900">{shoe.brand} {shoe.model}</h3>
-                  <p className="mt-2 text-2xl font-bold text-gray-900">₱{shoe.price}</p>
-                  <p className={`mt-1 text-sm ${
-                    shoe.currentStock < 5 ? 'text-red-600' : 'text-gray-500'
-                  }`}>
+    <div className="dashboard-wrapper">
+      <div className="dashboard-container">
+        <div className="dashboard-header">
+          <h1 className="dashboard-title">Checkout</h1>
+        </div>
+
+        <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '2rem' }}>
+          {/* Products Section */}
+          <div>
+            <div className="stats-grid">
+              {shoes.map(shoe => (
+                <div key={shoe.id} className="stat-card">
+                  <h3 className="stat-value">{shoe.brand} {shoe.model}</h3>
+                  <p className="stat-label" style={{ marginTop: '0.5rem' }}>₱{shoe.price}</p>
+                  <p className="stat-label" style={{ 
+                    color: shoe.currentStock < 5 ? 'var(--error-gradient)' : 'var(--accent)',
+                    marginTop: '0.5rem'
+                  }}>
                     Stock: {shoe.currentStock}
                   </p>
                   <button
                     onClick={() => addToCart(shoe)}
                     disabled={shoe.currentStock < 1 || loading}
-                    className="mt-4 w-full inline-flex items-center justify-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:bg-gray-300 disabled:cursor-not-allowed"
+                    style={{
+                      width: '100%',
+                      padding: '0.75rem',
+                      marginTop: '1rem',
+                      background: shoe.currentStock < 1 ? 'var(--surface)' : 'var(--accent-gradient)',
+                      border: 'none',
+                      borderRadius: '0.5rem',
+                      color: shoe.currentStock < 1 ? 'var(--text-secondary)' : 'var(--primary)',
+                      fontWeight: 'bold',
+                      cursor: shoe.currentStock < 1 ? 'not-allowed' : 'pointer',
+                      transition: 'transform 0.2s ease'
+                    }}
                   >
                     Add to Cart
                   </button>
                 </div>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Cart Section */}
-        <div className="lg:w-1/3">
-          <div className="bg-white rounded-lg shadow-sm p-6 sticky top-8">
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-2xl font-bold text-gray-900">Cart</h2>
+              ))}
             </div>
+          </div>
+
+          {/* Cart Section */}
+          <div className="stat-card" style={{ position: 'sticky', top: '2rem', height: 'fit-content' }}>
+            <h2 className="stat-value" style={{ marginBottom: '1.5rem' }}>Cart</h2>
 
             {cart.length === 0 ? (
-              <p className="text-gray-500 text-center py-6">Your cart is empty</p>
+              <p className="stat-label" style={{ textAlign: 'center', padding: '2rem 0' }}>
+                Your cart is empty
+              </p>
             ) : (
               <>
-                <div className="space-y-4 mb-6">
+                <div style={{ marginBottom: '1.5rem' }}>
                   {cart.map(item => (
-                    <div key={item.shoeId} className="flex items-center justify-between">
-                      <div className="flex-1">
-                        <p className="font-medium text-gray-900">{item.name}</p>
-                        <p className="text-sm text-gray-500">₱{item.price} each</p>
+                    <div key={item.shoeId} style={{ 
+                      padding: '1rem 0',
+                      borderBottom: '1px solid rgba(255, 215, 0, 0.1)'
+                    }}>
+                      <div style={{ marginBottom: '0.5rem' }}>
+                        <p className="stat-label">{item.name}</p>
+                        <p style={{ color: 'var(--accent)' }}>₱{item.price} each</p>
                       </div>
-                      <div className="flex items-center space-x-3">
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                         <button
                           onClick={() => updateQuantity(item.shoeId, Math.max(1, item.quantity - 1))}
-                          className="p-1 rounded-full hover:bg-gray-100"
+                          style={{
+                            padding: '0.5rem',
+                            background: 'var(--surface)',
+                            border: '1px solid var(--accent)',
+                            borderRadius: '0.25rem',
+                            color: 'var(--accent)',
+                            cursor: 'pointer'
+                          }}
                         >
                           -
                         </button>
@@ -162,17 +185,40 @@ export default function Checkout() {
                           max={item.maxStock}
                           value={item.quantity}
                           onChange={(e) => updateQuantity(item.shoeId, parseInt(e.target.value))}
-                          className="w-16 text-center border-gray-300 rounded-md"
+                          style={{
+                            width: '4rem',
+                            padding: '0.5rem',
+                            background: 'var(--surface)',
+                            border: '1px solid rgba(255, 215, 0, 0.1)',
+                            borderRadius: '0.25rem',
+                            color: 'var(--text-primary)',
+                            textAlign: 'center'
+                          }}
                         />
                         <button
                           onClick={() => updateQuantity(item.shoeId, Math.min(item.maxStock, item.quantity + 1))}
-                          className="p-1 rounded-full hover:bg-gray-100"
+                          style={{
+                            padding: '0.5rem',
+                            background: 'var(--surface)',
+                            border: '1px solid var(--accent)',
+                            borderRadius: '0.25rem',
+                            color: 'var(--accent)',
+                            cursor: 'pointer'
+                          }}
                         >
                           +
                         </button>
                         <button
                           onClick={() => removeFromCart(item.shoeId)}
-                          className="p-1 text-red-600 hover:bg-red-50 rounded-full"
+                          style={{
+                            padding: '0.5rem',
+                            background: 'var(--error-gradient)',
+                            border: 'none',
+                            borderRadius: '0.25rem',
+                            color: 'var(--text-primary)',
+                            marginLeft: 'auto',
+                            cursor: 'pointer'
+                          }}
                         >
                           Remove
                         </button>
@@ -181,15 +227,34 @@ export default function Checkout() {
                   ))}
                 </div>
 
-                <div className="border-t pt-4">
-                  <div className="flex justify-between items-center text-lg font-bold mb-6">
-                    <span>Total:</span>
-                    <span>₱{cart.reduce((sum, item) => sum + (item.quantity * item.price), 0).toFixed(2)}</span>
+                <div style={{ 
+                  borderTop: '1px solid rgba(255, 215, 0, 0.1)',
+                  paddingTop: '1rem'
+                }}>
+                  <div style={{ 
+                    display: 'flex', 
+                    justifyContent: 'space-between',
+                    marginBottom: '1.5rem'
+                  }}>
+                    <span className="stat-label">Total:</span>
+                    <span className="stat-value">
+                      ₱{cart.reduce((sum, item) => sum + (item.quantity * item.price), 0).toFixed(2)}
+                    </span>
                   </div>
                   <button
                     onClick={handleCheckout}
                     disabled={loading}
-                    className="w-full py-3 px-4 bg-green-600 text-white rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 disabled:bg-gray-300 disabled:cursor-not-allowed"
+                    style={{
+                      width: '100%',
+                      padding: '1rem',
+                      background: loading ? 'var(--surface)' : 'var(--accent-gradient)',
+                      border: 'none',
+                      borderRadius: '0.5rem',
+                      color: loading ? 'var(--text-secondary)' : 'var(--primary)',
+                      fontWeight: 'bold',
+                      cursor: loading ? 'not-allowed' : 'pointer',
+                      transition: 'transform 0.2s ease'
+                    }}
                   >
                     {loading ? 'Processing...' : 'Checkout'}
                   </button>

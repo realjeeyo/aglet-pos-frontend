@@ -6,12 +6,14 @@ import {
   CubeIcon,
   ChartBarIcon,
   Cog6ToothIcon,
+  ChevronRightIcon,
 } from "@heroicons/react/24/outline";
+
 import Dashboard from "./pages/Dashboard";
 import Sales from "./pages/Sales";
 import Products from "./pages/Products";
 import Settings from "./pages/Settings";
-import Checkout from "./pages/Checkout";
+import Checkout from './pages/Checkout';
 
 function App() {
   const [isExpanded, setIsExpanded] = useState(false);
@@ -26,60 +28,97 @@ function App() {
 
   return (
     <Router>
-      <div style={{ display: "flex", minHeight: "100vh" }}>
-        {/* Sidebar Navigation */}
-        <nav
+      <div className="flex min-h-screen" style={{ background: 'var(--background)' }}>
+        {/* Sidebar with fixed position */}
+        <nav 
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            bottom: 0,
+            width: isExpanded ? '256px' : '64px',
+            background: 'var(--primary)',
+            transition: 'all 0.3s ease',
+            borderRight: '1px solid rgba(255, 215, 0, 0.1)',
+            zIndex: 50,
+            display: 'flex',
+            flexDirection: 'column'
+          }}
           onMouseEnter={() => setIsExpanded(true)}
           onMouseLeave={() => setIsExpanded(false)}
-          style={{
-            width: isExpanded ? "200px" : "60px",
-            background: "#1f2937",
-            color: "white",
-            transition: "width 0.3s ease-in-out",
-            overflow: "hidden",
-          }}
         >
-          {/* Brand / Logo */}
-          <div
-            style={{
-              padding: "1rem",
-              fontWeight: "bold",
-              fontSize: isExpanded ? "16px" : "12px",
-              whiteSpace: "nowrap",
-              textAlign: isExpanded ? "left" : "center",
-            }}
-          >
-            {isExpanded ? "Aglet POS" : "A"}
-          </div>
+          <div style={{ height: '100%', overflowY: 'auto' }}>
+            <div 
+              style={{ 
+                padding: '1rem',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: isExpanded ? 'space-between' : 'center',
+                borderBottom: '1px solid rgba(255, 215, 0, 0.1)'
+              }}
+            >
+              {isExpanded && (
+                <span style={{ 
+                  background: 'var(--accent-gradient)',
+                  WebkitBackgroundClip: 'text',
+                  WebkitTextFillColor: 'transparent',
+                  fontWeight: 600,
+                  fontSize: '1.25rem'
+                }}>
+                  Aglet POS
+                </span>
+              )}
+              <ChevronRightIcon 
+                style={{
+                  width: '20px',
+                  height: '20px',
+                  color: 'var(--accent)',
+                  transform: isExpanded ? 'rotate(180deg)' : 'rotate(0)',
+                  transition: 'transform 0.3s ease'
+                }}
+              />
+            </div>
 
-          {/* Menu */}
-          <ul style={{ listStyle: "none", padding: "1rem", margin: 0 }}>
-            {navItems.map(({ path, name, icon: Icon }) => (
-              <li key={path} style={{ marginBottom: "1rem" }}>
+            <div style={{ marginTop: '1.5rem' }}>
+              {navItems.map(({ path, name, icon: Icon }) => (
                 <Link
+                  key={path}
                   to={path}
                   style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: isExpanded ? "10px" : "0",
-                    color: "white",
-                    textDecoration: "none",
-                    fontSize: "14px",
-                    whiteSpace: "nowrap",
+                    display: 'flex',
+                    alignItems: 'center',
+                    padding: '0.75rem 1rem',
+                    color: 'var(--text-secondary)',
+                    gap: isExpanded ? '0.75rem' : '0',
+                    justifyContent: isExpanded ? 'flex-start' : 'center',
+                    transition: 'all 0.3s ease',
+                    textDecoration: 'none', // Remove underline
+                  }}
+                  onMouseOver={(e) => {
+                    e.currentTarget.style.backgroundColor = 'var(--surface-hover)';
+                    e.currentTarget.style.color = 'var(--accent)';
+                  }}
+                  onMouseOut={(e) => {
+                    e.currentTarget.style.backgroundColor = 'transparent';
+                    e.currentTarget.style.color = 'var(--text-secondary)';
                   }}
                 >
-                  <Icon style={{ height: "20px", width: "20px", flexShrink: 0 }} />
-                  {isExpanded && <span>{name}</span>}
+                  <Icon style={{ width: '20px', height: '20px' }} />
+                  {isExpanded && <span style={{ whiteSpace: 'nowrap' }}>{name}</span>}
                 </Link>
-              </li>
-            ))}
-          </ul>
+              ))}
+            </div>
+          </div>
         </nav>
 
-        {/* Main Content */}
-        <main
-          style={{ flex: 1, padding: "1rem" }}
-        >
+        {/* Main Content with offset */}
+        <main style={{ 
+          flex: 1,
+          padding: '1rem',
+          marginLeft: isExpanded ? '256px' : '64px',
+          transition: 'margin-left 0.3s ease',
+          width: '100%'
+        }}>
           <Routes>
             <Route path="/" element={<Dashboard />} />
             <Route path="/products" element={<Products />} />
@@ -88,7 +127,6 @@ function App() {
             <Route path="/settings" element={<Settings />} />
           </Routes>
         </main>
-
       </div>
     </Router>
   );
