@@ -1,4 +1,8 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Edit, Trash2 } from "lucide-react";
 
 const API_URL = "http://localhost:3000/api";
 
@@ -88,242 +92,128 @@ export default function Products() {
     });
   };
 
-  if (error) return <div>Error: {error}</div>;
+  if (error) return <div className="p-6 text-[var(--color-destructive)]">Error: {error}</div>;
 
   return (
-    <div className="dashboard-wrapper">
-      <div className="dashboard-container">
-        <div className="dashboard-header">
-          <h1 className="dashboard-title">Product Management</h1>
-        </div>
+    <div className="p-6 space-y-6">
+      <h1 className="text-3xl font-bold text-[var(--color-primary)]">Product Management</h1>
 
-        {/* Product Form Card */}
-        <div className="stat-card" style={{ marginBottom: '2rem' }}>
-          <form onSubmit={handleSubmit}>
-            <div style={{ 
-              display: 'grid', 
-              gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-              gap: '1.5rem'
-            }}>
-              <div className="form-group">
-                <label className="stat-label">Brand</label>
-                <input
+      {/* Product Form Card */}
+      <Card>
+        <CardHeader>
+          <CardTitle>{editingId ? 'Edit Product' : 'Add New Product'}</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Brand</label>
+                <Input
                   type="text"
                   name="brand"
                   value={form.brand}
                   onChange={handleChange}
-                  style={{
-                    width: '100%',
-                    padding: '0.75rem',
-                    background: 'var(--surface)',
-                    border: '1px solid rgba(255, 215, 0, 0.1)',
-                    borderRadius: '0.5rem',
-                    color: 'var(--text-primary)',
-                    marginTop: '0.5rem'
-                  }}
                   required
                 />
               </div>
 
-              <div className="form-group">
-                <label className="stat-label">Model</label>
-                <input
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Model</label>
+                <Input
                   type="text"
                   name="model"
                   value={form.model}
                   onChange={handleChange}
-                  style={{
-                    width: '100%',
-                    padding: '0.75rem',
-                    background: 'var(--surface)',
-                    border: '1px solid rgba(255, 215, 0, 0.1)',
-                    borderRadius: '0.5rem',
-                    color: 'var(--text-primary)',
-                    marginTop: '0.5rem'
-                  }}
                   required
                 />
               </div>
 
-              <div className="form-group">
-                <label className="stat-label">Size</label>
-                <input
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Size</label>
+                <Input
                   type="number"
                   name="size"
                   value={form.size}
                   onChange={handleChange}
-                  style={{
-                    width: '100%',
-                    padding: '0.75rem',
-                    background: 'var(--surface)',
-                    border: '1px solid rgba(255, 215, 0, 0.1)',
-                    borderRadius: '0.5rem',
-                    color: 'var(--text-primary)',
-                    marginTop: '0.5rem'
-                  }}
                   required
                 />
               </div>
 
-              <div className="form-group">
-                <label className="stat-label">Price</label>
-                <input
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Price</label>
+                <Input
                   type="number"
                   name="price"
                   value={form.price}
                   onChange={handleChange}
-                  style={{
-                    width: '100%',
-                    padding: '0.75rem',
-                    background: 'var(--surface)',
-                    border: '1px solid rgba(255, 215, 0, 0.1)',
-                    borderRadius: '0.5rem',
-                    color: 'var(--text-primary)',
-                    marginTop: '0.5rem'
-                  }}
                   required
                 />
               </div>
 
-              <div className="form-group">
-                <label className="stat-label">Current Stock</label>
-                <input
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Current Stock</label>
+                <Input
                   type="number"
                   name="currentStock"
                   value={form.currentStock}
                   onChange={handleChange}
-                  style={{
-                    width: '100%',
-                    padding: '0.75rem',
-                    background: 'var(--surface)',
-                    border: '1px solid rgba(255, 215, 0, 0.1)',
-                    borderRadius: '0.5rem',
-                    color: 'var(--text-primary)',
-                    marginTop: '0.5rem'
-                  }}
                   required
                 />
               </div>
 
-              <div className="form-group">
-                <label className="stat-label">Purchase Price</label>
-                <input
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Purchase Price</label>
+                <Input
                   type="number"
                   name="purchasePrice"
                   value={form.purchasePrice}
                   onChange={handleChange}
-                  style={{
-                    width: '100%',
-                    padding: '0.75rem',
-                    background: 'var(--surface)',
-                    border: '1px solid rgba(255, 215, 0, 0.1)',
-                    borderRadius: '0.5rem',
-                    color: 'var(--text-primary)',
-                    marginTop: '0.5rem'
-                  }}
                   required
                 />
               </div>
             </div>
 
-            <div style={{ 
-              marginTop: '2rem',
-              display: 'flex',
-              gap: '1rem'
-            }}>
-              <button
-                type="submit"
-                style={{
-                  padding: '0.75rem 1.5rem',
-                  background: 'var(--accent-gradient)',
-                  border: 'none',
-                  borderRadius: '0.5rem',
-                  color: 'var(--primary)',
-                  fontWeight: 'bold',
-                  cursor: 'pointer',
-                  transition: 'transform 0.2s ease'
-                }}
-              >
+            <div className="flex gap-3">
+              <Button type="submit">
                 {editingId ? 'Update Product' : 'Add Product'}
-              </button>
+              </Button>
               {editingId && (
-                <button
-                  type="button"
-                  onClick={resetForm}
-                  style={{
-                    padding: '0.75rem 1.5rem',
-                    background: 'var(--surface)',
-                    border: '1px solid var(--accent)',
-                    borderRadius: '0.5rem',
-                    color: 'var(--accent)',
-                    cursor: 'pointer',
-                    transition: 'all 0.2s ease'
-                  }}
-                >
+                <Button type="button" variant="outline" onClick={resetForm}>
                   Cancel
-                </button>
+                </Button>
               )}
             </div>
           </form>
-        </div>
+        </CardContent>
+      </Card>
 
-        {/* Products Grid */}
-        <div className="stats-grid">
-          {shoes.map(shoe => (
-            <div key={shoe.id} className="stat-card">
-              <div style={{ 
-                display: 'flex', 
-                justifyContent: 'space-between',
-                alignItems: 'flex-start'
-              }}>
-                <div>
-                  <h3 className="stat-value">{shoe.brand}</h3>
-                  <p className="stat-label">{shoe.model}</p>
-                  <p className="stat-label" style={{ marginTop: '1rem' }}>
-                    Size: {shoe.size}
-                  </p>
-                  <p className="stat-value" style={{ marginTop: '0.5rem' }}>
-                    ₱{shoe.price}
-                  </p>
-                  <p className="stat-label" style={{ 
-                    marginTop: '0.5rem',
-                    color: shoe.currentStock < 5 ? 'var(--error-gradient)' : 'var(--success-gradient)'
-                  }}>
+      {/* Products Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        {shoes.map(shoe => (
+          <Card key={shoe.id}>
+            <CardContent className="pt-6">
+              <div className="flex justify-between items-start">
+                <div className="space-y-2">
+                  <h3 className="text-xl font-bold">{shoe.brand}</h3>
+                  <p className="text-sm text-[var(--color-muted-foreground)]">{shoe.model}</p>
+                  <p className="text-sm">Size: {shoe.size}</p>
+                  <p className="text-2xl font-bold text-[var(--color-primary)]">₱{shoe.price}</p>
+                  <p className={`text-sm font-semibold ${shoe.currentStock < 5 ? 'text-[var(--color-destructive)]' : 'text-[var(--color-primary)]'}`}>
                     Stock: {shoe.currentStock}
                   </p>
                 </div>
-                <div style={{ display: 'flex', gap: '0.5rem' }}>
-                  <button
-                    onClick={() => handleEdit(shoe)}
-                    style={{
-                      padding: '0.5rem',
-                      background: 'var(--accent)',
-                      border: 'none',
-                      borderRadius: '0.25rem',
-                      color: 'var(--primary)',
-                      cursor: 'pointer'
-                    }}
-                  >
-                    Edit
-                  </button>
-                  <button
-                    onClick={() => handleDelete(shoe.id)}
-                    style={{
-                      padding: '0.5rem',
-                      background: 'var(--error-gradient)',
-                      border: 'none',
-                      borderRadius: '0.25rem',
-                      color: 'var(--text-primary)',
-                      cursor: 'pointer'
-                    }}
-                  >
-                    Delete
-                  </button>
+                <div className="flex gap-2">
+                  <Button size="icon" variant="ghost" onClick={() => handleEdit(shoe)}>
+                    <Edit size={16} />
+                  </Button>
+                  <Button size="icon" variant="ghost" onClick={() => handleDelete(shoe.id)}>
+                    <Trash2 size={16} className="text-[var(--color-destructive)]" />
+                  </Button>
                 </div>
               </div>
-            </div>
-          ))}
-        </div>
+            </CardContent>
+          </Card>
+        ))}
       </div>
     </div>
   );

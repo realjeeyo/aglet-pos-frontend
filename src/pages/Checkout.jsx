@@ -1,4 +1,8 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Plus, Minus, Trash2 } from "lucide-react";
 
 const API_URL = "http://localhost:3000/api";
 
@@ -98,170 +102,111 @@ export default function Checkout() {
     }
   };
 
-  if (loading) return <div className="dashboard-wrapper">Loading...</div>;
-  if (error) return <div className="dashboard-wrapper" style={{ color: 'var(--error-gradient)' }}>Error: {error}</div>;
+  if (loading) return <div className="p-6">Loading...</div>;
+  if (error) return <div className="p-6 text-[var(--color-destructive)]">Error: {error}</div>;
 
   return (
-    <div className="dashboard-wrapper">
-      <div className="dashboard-container">
-        <div className="dashboard-header">
-          <h1 className="dashboard-title">Checkout</h1>
+    <div className="p-6 space-y-6">
+      <h1 className="text-3xl font-bold text-[var(--color-primary)]">Checkout</h1>
+
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Products Section */}
+        <div className="lg:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-4">
+          {shoes.map(shoe => (
+            <Card key={shoe.id}>
+              <CardContent className="pt-6">
+                <h3 className="text-lg font-bold">{shoe.brand} {shoe.model}</h3>
+                <p className="text-2xl font-bold text-[var(--color-primary)] mt-2">₱{shoe.price}</p>
+                <p className={`text-sm mt-2 font-semibold ${shoe.currentStock < 5 ? 'text-[var(--color-destructive)]' : 'text-[var(--color-primary)]'}`}>
+                  Stock: {shoe.currentStock}
+                </p>
+                <Button
+                  onClick={() => addToCart(shoe)}
+                  disabled={shoe.currentStock < 1 || loading}
+                  className="w-full mt-4"
+                >
+                  Add to Cart
+                </Button>
+              </CardContent>
+            </Card>
+          ))}
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '2rem' }}>
-          {/* Products Section */}
-          <div>
-            <div className="stats-grid">
-              {shoes.map(shoe => (
-                <div key={shoe.id} className="stat-card">
-                  <h3 className="stat-value">{shoe.brand} {shoe.model}</h3>
-                  <p className="stat-label" style={{ marginTop: '0.5rem' }}>₱{shoe.price}</p>
-                  <p className="stat-label" style={{ 
-                    color: shoe.currentStock < 5 ? 'var(--error-gradient)' : 'var(--accent)',
-                    marginTop: '0.5rem'
-                  }}>
-                    Stock: {shoe.currentStock}
-                  </p>
-                  <button
-                    onClick={() => addToCart(shoe)}
-                    disabled={shoe.currentStock < 1 || loading}
-                    style={{
-                      width: '100%',
-                      padding: '0.75rem',
-                      marginTop: '1rem',
-                      background: shoe.currentStock < 1 ? 'var(--surface)' : 'var(--accent-gradient)',
-                      border: 'none',
-                      borderRadius: '0.5rem',
-                      color: shoe.currentStock < 1 ? 'var(--text-secondary)' : 'var(--primary)',
-                      fontWeight: 'bold',
-                      cursor: shoe.currentStock < 1 ? 'not-allowed' : 'pointer',
-                      transition: 'transform 0.2s ease'
-                    }}
-                  >
-                    Add to Cart
-                  </button>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Cart Section */}
-          <div className="stat-card" style={{ position: 'sticky', top: '2rem', height: 'fit-content' }}>
-            <h2 className="stat-value" style={{ marginBottom: '1.5rem' }}>Cart</h2>
-
-            {cart.length === 0 ? (
-              <p className="stat-label" style={{ textAlign: 'center', padding: '2rem 0' }}>
-                Your cart is empty
-              </p>
-            ) : (
-              <>
-                <div style={{ marginBottom: '1.5rem' }}>
-                  {cart.map(item => (
-                    <div key={item.shoeId} style={{ 
-                      padding: '1rem 0',
-                      borderBottom: '1px solid rgba(255, 215, 0, 0.1)'
-                    }}>
-                      <div style={{ marginBottom: '0.5rem' }}>
-                        <p className="stat-label">{item.name}</p>
-                        <p style={{ color: 'var(--accent)' }}>₱{item.price} each</p>
+        {/* Cart Section */}
+        <div className="lg:col-span-1">
+          <Card className="sticky top-4">
+            <CardHeader>
+              <CardTitle>Cart</CardTitle>
+            </CardHeader>
+            <CardContent>
+              {cart.length === 0 ? (
+                <p className="text-center py-8 text-[var(--color-muted-foreground)]">
+                  Your cart is empty
+                </p>
+              ) : (
+                <div className="space-y-4">
+                  <div className="space-y-4">
+                    {cart.map(item => (
+                      <div key={item.shoeId} className="pb-4 border-b border-border">
+                        <div className="mb-2">
+                          <p className="font-medium">{item.name}</p>
+                          <p className="text-sm text-[var(--color-primary)]">₱{item.price} each</p>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Button
+                            size="icon"
+                            variant="outline"
+                            onClick={() => updateQuantity(item.shoeId, Math.max(1, item.quantity - 1))}
+                          >
+                            <Minus size={16} />
+                          </Button>
+                          <Input
+                            type="number"
+                            min="1"
+                            max={item.maxStock}
+                            value={item.quantity}
+                            onChange={(e) => updateQuantity(item.shoeId, parseInt(e.target.value))}
+                            className="w-16 text-center"
+                          />
+                          <Button
+                            size="icon"
+                            variant="outline"
+                            onClick={() => updateQuantity(item.shoeId, Math.min(item.maxStock, item.quantity + 1))}
+                          >
+                            <Plus size={16} />
+                          </Button>
+                          <Button
+                            size="icon"
+                            variant="ghost"
+                            onClick={() => removeFromCart(item.shoeId)}
+                            className="ml-auto"
+                          >
+                            <Trash2 size={16} className="text-[var(--color-destructive)]" />
+                          </Button>
+                        </div>
                       </div>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                        <button
-                          onClick={() => updateQuantity(item.shoeId, Math.max(1, item.quantity - 1))}
-                          style={{
-                            padding: '0.5rem',
-                            background: 'var(--surface)',
-                            border: '1px solid var(--accent)',
-                            borderRadius: '0.25rem',
-                            color: 'var(--accent)',
-                            cursor: 'pointer'
-                          }}
-                        >
-                          -
-                        </button>
-                        <input
-                          type="number"
-                          min="1"
-                          max={item.maxStock}
-                          value={item.quantity}
-                          onChange={(e) => updateQuantity(item.shoeId, parseInt(e.target.value))}
-                          style={{
-                            width: '4rem',
-                            padding: '0.5rem',
-                            background: 'var(--surface)',
-                            border: '1px solid rgba(255, 215, 0, 0.1)',
-                            borderRadius: '0.25rem',
-                            color: 'var(--text-primary)',
-                            textAlign: 'center'
-                          }}
-                        />
-                        <button
-                          onClick={() => updateQuantity(item.shoeId, Math.min(item.maxStock, item.quantity + 1))}
-                          style={{
-                            padding: '0.5rem',
-                            background: 'var(--surface)',
-                            border: '1px solid var(--accent)',
-                            borderRadius: '0.25rem',
-                            color: 'var(--accent)',
-                            cursor: 'pointer'
-                          }}
-                        >
-                          +
-                        </button>
-                        <button
-                          onClick={() => removeFromCart(item.shoeId)}
-                          style={{
-                            padding: '0.5rem',
-                            background: 'var(--error-gradient)',
-                            border: 'none',
-                            borderRadius: '0.25rem',
-                            color: 'var(--text-primary)',
-                            marginLeft: 'auto',
-                            cursor: 'pointer'
-                          }}
-                        >
-                          Remove
-                        </button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-
-                <div style={{ 
-                  borderTop: '1px solid rgba(255, 215, 0, 0.1)',
-                  paddingTop: '1rem'
-                }}>
-                  <div style={{ 
-                    display: 'flex', 
-                    justifyContent: 'space-between',
-                    marginBottom: '1.5rem'
-                  }}>
-                    <span className="stat-label">Total:</span>
-                    <span className="stat-value">
-                      ₱{cart.reduce((sum, item) => sum + (item.quantity * item.price), 0).toFixed(2)}
-                    </span>
+                    ))}
                   </div>
-                  <button
-                    onClick={handleCheckout}
-                    disabled={loading}
-                    style={{
-                      width: '100%',
-                      padding: '1rem',
-                      background: loading ? 'var(--surface)' : 'var(--accent-gradient)',
-                      border: 'none',
-                      borderRadius: '0.5rem',
-                      color: loading ? 'var(--text-secondary)' : 'var(--primary)',
-                      fontWeight: 'bold',
-                      cursor: loading ? 'not-allowed' : 'pointer',
-                      transition: 'transform 0.2s ease'
-                    }}
-                  >
-                    {loading ? 'Processing...' : 'Checkout'}
-                  </button>
+
+                  <div className="pt-4 border-t border-border">
+                    <div className="flex justify-between items-center mb-4">
+                      <span className="text-lg font-semibold">Total:</span>
+                      <span className="text-2xl font-bold text-[var(--color-primary)]">
+                        ₱{cart.reduce((sum, item) => sum + (item.quantity * item.price), 0).toFixed(2)}
+                      </span>
+                    </div>
+                    <Button
+                      onClick={handleCheckout}
+                      disabled={loading}
+                      className="w-full"
+                    >
+                      {loading ? 'Processing...' : 'Checkout'}
+                    </Button>
+                  </div>
                 </div>
-              </>
-            )}
-          </div>
+              )}
+            </CardContent>
+          </Card>
         </div>
       </div>
     </div>

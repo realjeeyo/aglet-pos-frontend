@@ -1,14 +1,15 @@
 import { useState } from "react";
 import { BrowserRouter as Router, Routes, Route, Link } from "react-router-dom";
 import {
-  HomeIcon,
-  ShoppingCartIcon,
-  CubeIcon,
-  ChartBarIcon,
-  Cog6ToothIcon,
-  ChevronRightIcon,
-} from "@heroicons/react/24/outline";
-import { Sun, Moon } from "lucide-react";
+  Home,
+  ShoppingCart,
+  Package,
+  BarChart3,
+  Settings as SettingsIcon,
+  ChevronRight,
+  Sun,
+  Moon
+} from "lucide-react";
 import { useTheme } from "./context/ThemeContext";
 
 import Dashboard from "./pages/Dashboard";
@@ -22,126 +23,53 @@ function App() {
   const { theme, toggleTheme } = useTheme();
 
   const navItems = [
-    { path: "/", name: "Dashboard", icon: HomeIcon },
-    { path: "/checkout", name: "Checkout", icon: ShoppingCartIcon },
-    { path: "/products", name: "Products", icon: CubeIcon },
-    { path: "/sales", name: "Sales", icon: ChartBarIcon },
-    { path: "/settings", name: "Settings", icon: Cog6ToothIcon },
+    { path: "/", name: "Dashboard", icon: Home },
+    { path: "/checkout", name: "Checkout", icon: ShoppingCart },
+    { path: "/products", name: "Products", icon: Package },
+    { path: "/sales", name: "Sales", icon: BarChart3 },
+    { path: "/settings", name: "Settings", icon: SettingsIcon },
   ];
 
   return (
     <Router>
-      <div className="flex min-h-screen" style={{ background: 'var(--background)' }}>
-        {/* Sidebar with fixed position */}
+      <div className="flex min-h-screen">
+        {/* Sidebar with fixed position - no animations */}
         <nav 
-          style={{
-            position: 'fixed',
-            top: 0,
-            left: 0,
-            bottom: 0,
-            width: isExpanded ? '256px' : '64px',
-            background: 'var(--primary)',
-            transition: 'all 0.3s ease',
-            borderRight: '1px solid var(--border-color)',
-            zIndex: 50,
-            display: 'flex',
-            flexDirection: 'column'
-          }}
+          className={`fixed top-0 left-0 bottom-0 ${isExpanded ? 'w-64' : 'w-16'} bg-[var(--color-card)] border-r border-[var(--color-border)] z-50 flex flex-col`}
           onMouseEnter={() => setIsExpanded(true)}
           onMouseLeave={() => setIsExpanded(false)}
         >
-          <div style={{ height: '100%', overflowY: 'auto' }}>
-            <div 
-              style={{ 
-                padding: '1rem',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: isExpanded ? 'space-between' : 'center',
-                borderBottom: '1px solid var(--border-color)'
-              }}
-            >
+          <div className="h-full overflow-y-auto">
+            <div className={`p-4 flex items-center ${isExpanded ? 'justify-between' : 'justify-center'} border-b border-[var(--color-border)]`}>
               {isExpanded && (
-                <span style={{ 
-                  background: 'var(--accent-gradient)',
-                  WebkitBackgroundClip: 'text',
-                  WebkitTextFillColor: 'transparent',
-                  fontWeight: 600,
-                  fontSize: '1.25rem'
-                }}>
+                <span className="text-[var(--color-primary)] font-semibold text-xl">
                   Aglet POS
                 </span>
               )}
-              <ChevronRightIcon 
-                style={{
-                  width: '20px',
-                  height: '20px',
-                  color: 'var(--accent)',
-                  transform: isExpanded ? 'rotate(180deg)' : 'rotate(0)',
-                  transition: 'transform 0.3s ease'
-                }}
+              <ChevronRight 
+                size={20}
+                className={`text-[var(--color-primary)] ${isExpanded ? 'rotate-180' : ''}`}
               />
             </div>
 
-            <div style={{ marginTop: '1.5rem' }}>
+            <div className="mt-6">
               {navItems.map(({ path, name, icon: Icon }) => (
                 <Link
                   key={path}
                   to={path}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    padding: '0.75rem 1rem',
-                    color: 'var(--text-secondary)',
-                    gap: isExpanded ? '0.75rem' : '0',
-                    justifyContent: isExpanded ? 'flex-start' : 'center',
-                    transition: 'all 0.3s ease',
-                    textDecoration: 'none',
-                  }}
-                  onMouseOver={(e) => {
-                    e.currentTarget.style.backgroundColor = 'var(--surface-hover)';
-                    e.currentTarget.style.color = 'var(--accent)';
-                  }}
-                  onMouseOut={(e) => {
-                    e.currentTarget.style.backgroundColor = 'transparent';
-                    e.currentTarget.style.color = 'var(--text-secondary)';
-                  }}
+                  className={`flex items-center px-4 py-3 text-[var(--color-muted-foreground)] hover:bg-[var(--color-muted)] hover:text-[var(--color-primary)] ${isExpanded ? 'gap-3' : 'justify-center'} no-underline`}
                 >
-                  <Icon style={{ width: '20px', height: '20px' }} />
-                  {isExpanded && <span style={{ whiteSpace: 'nowrap' }}>{name}</span>}
+                  <Icon size={20} />
+                  {isExpanded && <span className="whitespace-nowrap">{name}</span>}
                 </Link>
               ))}
             </div>
 
             {/* Theme Toggle Button */}
-            <div style={{ 
-              marginTop: 'auto', 
-              padding: '1rem',
-              borderTop: '1px solid var(--border-color)'
-            }}>
+            <div className="mt-auto p-4 border-t border-[var(--color-border)]">
               <button
                 onClick={toggleTheme}
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: isExpanded ? 'flex-start' : 'center',
-                  width: '100%',
-                  padding: '0.75rem 1rem',
-                  background: 'transparent',
-                  border: 'none',
-                  color: 'var(--text-secondary)',
-                  cursor: 'pointer',
-                  borderRadius: '0.5rem',
-                  gap: isExpanded ? '0.75rem' : '0',
-                  transition: 'all 0.3s ease',
-                }}
-                onMouseOver={(e) => {
-                  e.currentTarget.style.backgroundColor = 'var(--surface-hover)';
-                  e.currentTarget.style.color = 'var(--accent)';
-                }}
-                onMouseOut={(e) => {
-                  e.currentTarget.style.backgroundColor = 'transparent';
-                  e.currentTarget.style.color = 'var(--text-secondary)';
-                }}
+                className={`flex items-center ${isExpanded ? 'justify-start' : 'justify-center'} w-full px-4 py-3 bg-transparent border-none text-[var(--color-muted-foreground)] cursor-pointer rounded-md hover:bg-[var(--color-muted)] hover:text-[var(--color-primary)] ${isExpanded ? 'gap-3' : ''}`}
               >
                 {theme === 'light' ? (
                   <Moon size={20} />
@@ -149,7 +77,7 @@ function App() {
                   <Sun size={20} />
                 )}
                 {isExpanded && (
-                  <span style={{ whiteSpace: 'nowrap' }}>
+                  <span className="whitespace-nowrap">
                     {theme === 'light' ? 'Dark Mode' : 'Light Mode'}
                   </span>
                 )}
@@ -158,14 +86,8 @@ function App() {
           </div>
         </nav>
 
-        {/* Main Content with offset */}
-        <main style={{ 
-          flex: 1,
-          padding: '1rem',
-          marginLeft: isExpanded ? '256px' : '64px',
-          transition: 'margin-left 0.3s ease',
-          width: '100%'
-        }}>
+        {/* Main Content with offset - no animation */}
+        <main className={`flex-1 p-4 ${isExpanded ? 'ml-64' : 'ml-16'} w-full`}>
           <Routes>
             <Route path="/" element={<Dashboard />} />
             <Route path="/products" element={<Products />} />

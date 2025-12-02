@@ -1,4 +1,6 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 
 const API_URL = "http://localhost:3000/api";
 
@@ -34,8 +36,8 @@ export default function Sales() {
 
   if (loading) {
     return (
-      <div className="dashboard-wrapper">
-        <div style={{ textAlign: 'center', color: 'var(--text-secondary)' }}>
+      <div className="p-6">
+        <div className="text-center text-[var(--color-muted-foreground)]">
           Loading...
         </div>
       </div>
@@ -44,8 +46,8 @@ export default function Sales() {
 
   if (error) {
     return (
-      <div className="dashboard-wrapper">
-        <div style={{ textAlign: 'center', color: 'var(--error-gradient)' }}>
+      <div className="p-6">
+        <div className="text-center text-[var(--color-destructive)]">
           Error: {error}
         </div>
       </div>
@@ -53,103 +55,48 @@ export default function Sales() {
   }
 
   return (
-    <div className="dashboard-wrapper">
-      <div className="dashboard-container">
-        <div className="dashboard-header">
-          <h1 className="dashboard-title">Sales History</h1>
-        </div>
+    <div className="p-6 space-y-6">
+      <h1 className="text-3xl font-bold text-[var(--color-primary)]">Sales History</h1>
 
-        <div className="stat-card">
-          <div style={{ overflowX: 'auto' }}>
-            <table style={{ width: '100%', borderCollapse: 'separate', borderSpacing: '0' }}>
-              <thead>
-                <tr>
-                  <th style={{
-                    padding: '1rem',
-                    textAlign: 'left',
-                    color: 'var(--text-secondary)',
-                    borderBottom: '1px solid rgba(255, 215, 0, 0.1)',
-                    fontWeight: '500'
-                  }}>ID</th>
-                  <th style={{
-                    padding: '1rem',
-                    textAlign: 'left',
-                    color: 'var(--text-secondary)',
-                    borderBottom: '1px solid rgba(255, 215, 0, 0.1)',
-                    fontWeight: '500'
-                  }}>Date</th>
-                  <th style={{
-                    padding: '1rem',
-                    textAlign: 'left',
-                    color: 'var(--text-secondary)',
-                    borderBottom: '1px solid rgba(255, 215, 0, 0.1)',
-                    fontWeight: '500'
-                  }}>Items</th>
-                  <th style={{
-                    padding: '1rem',
-                    textAlign: 'right',
-                    color: 'var(--text-secondary)',
-                    borderBottom: '1px solid rgba(255, 215, 0, 0.1)',
-                    fontWeight: '500'
-                  }}>Total</th>
-                </tr>
-              </thead>
-              <tbody>
-                {sales.map(sale => (
-                  <tr 
-                    key={sale.id}
-                    style={{
-                      transition: 'background-color 0.2s ease'
-                    }}
-                    onMouseEnter={e => e.currentTarget.style.backgroundColor = 'var(--surface-hover)'}
-                    onMouseLeave={e => e.currentTarget.style.backgroundColor = 'transparent'}
-                  >
-                    <td style={{
-                      padding: '1rem',
-                      borderBottom: '1px solid rgba(255, 215, 0, 0.1)',
-                      color: 'var(--accent)'
-                    }}>
-                      #{sale.id}
-                    </td>
-                    <td style={{
-                      padding: '1rem',
-                      borderBottom: '1px solid rgba(255, 215, 0, 0.1)',
-                      color: 'var(--text-secondary)'
-                    }}>
-                      {new Date(sale.transactionDateTime).toLocaleString()}
-                    </td>
-                    <td style={{
-                      padding: '1rem',
-                      borderBottom: '1px solid rgba(255, 215, 0, 0.1)'
-                    }}>
+      <Card>
+        <CardHeader>
+          <CardTitle>All Transactions</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>ID</TableHead>
+                <TableHead>Date</TableHead>
+                <TableHead>Items</TableHead>
+                <TableHead className="text-right">Total</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {sales.map(sale => (
+                <TableRow key={sale.id}>
+                  <TableCell className="font-medium text-[var(--color-primary)]">#{sale.id}</TableCell>
+                  <TableCell className="text-[var(--color-muted-foreground)]">
+                    {new Date(sale.transactionDateTime).toLocaleString()}
+                  </TableCell>
+                  <TableCell>
+                    <div className="space-y-1">
                       {sale.details.map(detail => (
-                        <div 
-                          key={detail.id}
-                          style={{
-                            color: 'var(--text-primary)',
-                            marginBottom: '0.25rem'
-                          }}
-                        >
+                        <div key={detail.id} className="text-sm">
                           {detail.quantity}x {detail.Shoe.brand} {detail.Shoe.model}
                         </div>
                       ))}
-                    </td>
-                    <td style={{
-                      padding: '1rem',
-                      borderBottom: '1px solid rgba(255, 215, 0, 0.1)',
-                      textAlign: 'right',
-                      color: 'var(--accent)',
-                      fontWeight: '500'
-                    }}>
-                      {formatCurrency(sale.totalAmount)}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </div>
+                    </div>
+                  </TableCell>
+                  <TableCell className="text-right font-semibold text-[var(--color-primary)]">
+                    {formatCurrency(sale.totalAmount)}
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </CardContent>
+      </Card>
     </div>
   );
 }
