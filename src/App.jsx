@@ -52,7 +52,7 @@ function App() {
               />
             </div>
 
-            <div className="mt-6">
+            <div className="mt-6 flex-1">
               {navItems.map(({ path, name, icon: Icon }) => (
                 <Link
                   key={path}
@@ -65,11 +65,12 @@ function App() {
               ))}
             </div>
 
-            {/* Theme Toggle Button */}
-            <div className="mt-auto p-4 border-t border-[var(--color-border)]">
+            {/* Theme Toggle Button - Always visible at bottom */}
+            <div className="p-4 border-t border-[var(--color-border)]">
               <button
                 onClick={toggleTheme}
                 className={`flex items-center ${isExpanded ? 'justify-start' : 'justify-center'} w-full px-4 py-3 bg-transparent border-none text-[var(--color-muted-foreground)] cursor-pointer rounded-md hover:bg-[var(--color-muted)] hover:text-[var(--color-primary)] ${isExpanded ? 'gap-3' : ''}`}
+                title={theme === 'light' ? 'Switch to Dark Mode' : 'Switch to Light Mode'}
               >
                 {theme === 'light' ? (
                   <Moon size={20} />
