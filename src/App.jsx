@@ -8,6 +8,8 @@ import {
   Cog6ToothIcon,
   ChevronRightIcon,
 } from "@heroicons/react/24/outline";
+import { Sun, Moon } from "lucide-react";
+import { useTheme } from "./context/ThemeContext";
 
 import Dashboard from "./pages/Dashboard";
 import Sales from "./pages/Sales";
@@ -17,6 +19,7 @@ import Checkout from './pages/Checkout';
 
 function App() {
   const [isExpanded, setIsExpanded] = useState(false);
+  const { theme, toggleTheme } = useTheme();
 
   const navItems = [
     { path: "/", name: "Dashboard", icon: HomeIcon },
@@ -39,7 +42,7 @@ function App() {
             width: isExpanded ? '256px' : '64px',
             background: 'var(--primary)',
             transition: 'all 0.3s ease',
-            borderRight: '1px solid rgba(255, 215, 0, 0.1)',
+            borderRight: '1px solid var(--border-color)',
             zIndex: 50,
             display: 'flex',
             flexDirection: 'column'
@@ -54,7 +57,7 @@ function App() {
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: isExpanded ? 'space-between' : 'center',
-                borderBottom: '1px solid rgba(255, 215, 0, 0.1)'
+                borderBottom: '1px solid var(--border-color)'
               }}
             >
               {isExpanded && (
@@ -92,7 +95,7 @@ function App() {
                     gap: isExpanded ? '0.75rem' : '0',
                     justifyContent: isExpanded ? 'flex-start' : 'center',
                     transition: 'all 0.3s ease',
-                    textDecoration: 'none', // Remove underline
+                    textDecoration: 'none',
                   }}
                   onMouseOver={(e) => {
                     e.currentTarget.style.backgroundColor = 'var(--surface-hover)';
@@ -107,6 +110,50 @@ function App() {
                   {isExpanded && <span style={{ whiteSpace: 'nowrap' }}>{name}</span>}
                 </Link>
               ))}
+            </div>
+
+            {/* Theme Toggle Button */}
+            <div style={{ 
+              marginTop: 'auto', 
+              padding: '1rem',
+              borderTop: '1px solid var(--border-color)'
+            }}>
+              <button
+                onClick={toggleTheme}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: isExpanded ? 'flex-start' : 'center',
+                  width: '100%',
+                  padding: '0.75rem 1rem',
+                  background: 'transparent',
+                  border: 'none',
+                  color: 'var(--text-secondary)',
+                  cursor: 'pointer',
+                  borderRadius: '0.5rem',
+                  gap: isExpanded ? '0.75rem' : '0',
+                  transition: 'all 0.3s ease',
+                }}
+                onMouseOver={(e) => {
+                  e.currentTarget.style.backgroundColor = 'var(--surface-hover)';
+                  e.currentTarget.style.color = 'var(--accent)';
+                }}
+                onMouseOut={(e) => {
+                  e.currentTarget.style.backgroundColor = 'transparent';
+                  e.currentTarget.style.color = 'var(--text-secondary)';
+                }}
+              >
+                {theme === 'light' ? (
+                  <Moon size={20} />
+                ) : (
+                  <Sun size={20} />
+                )}
+                {isExpanded && (
+                  <span style={{ whiteSpace: 'nowrap' }}>
+                    {theme === 'light' ? 'Dark Mode' : 'Light Mode'}
+                  </span>
+                )}
+              </button>
             </div>
           </div>
         </nav>

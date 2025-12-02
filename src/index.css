@@ -1,5 +1,36 @@
-:root {
-  /* Dark theme colors with new accent colors */
+/* Light theme (default) */
+:root,
+[data-theme="light"] {
+  /* Light theme colors */
+  --primary: #ffffff;    /* White for sidebar */
+  --background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);  /* Light gradient */
+  --surface: #ffffff;    /* White for cards */
+  --surface-gradient: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+  --surface-hover: #f1f3f5;
+  --text-primary: #212529;
+  --text-secondary: #6c757d;
+  
+  /* Accent colors */
+  --accent: #ffa500;     /* Orange */
+  --accent-gradient: linear-gradient(135deg, #ffa500 0%, #ff8c00 100%);
+  --accent-hover: #ff8c00;
+  
+  /* Status colors */
+  --success-gradient: linear-gradient(135deg, #ffa500 0%, #ff8c00 100%);
+  --error-gradient: linear-gradient(135deg, #ff3b3b 0%, #dc2626 100%);
+  
+  /* Shadows */
+  --card-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  --card-shadow-hover: 0 10px 15px -3px rgba(0, 0, 0, 0.15), 0 4px 6px -2px rgba(0, 0, 0, 0.1);
+  
+  /* Border colors */
+  --border-color: rgba(0, 0, 0, 0.1);
+  --border-hover: rgba(255, 165, 0, 0.3);
+}
+
+/* Dark theme */
+[data-theme="dark"] {
+  /* Dark theme colors */
   --primary: #000000;    /* Pure black for sidebar */
   --background: linear-gradient(135deg, #1a1a1a 0%, #000000 100%);  /* Dark gradient */
   --surface: #1a1a1a;    /* Slightly lighter black for cards */
@@ -8,18 +39,22 @@
   --text-primary: #ffffff;
   --text-secondary: #999999;
   
-  /* New accent colors */
+  /* Accent colors */
   --accent: #ffd700;     /* Bright yellow */
   --accent-gradient: linear-gradient(135deg, #ffd700 0%, #ffb700 100%);
   --accent-hover: #ffb700;
   
   /* Status colors */
-  --success-gradient: linear-gradient(135deg, #ffd700 0%, #ffb700 100%); /* Yellow success */
-  --error-gradient: linear-gradient(135deg, #ff3b3b 0%, #dc2626 100%);   /* Bright red error */
+  --success-gradient: linear-gradient(135deg, #ffd700 0%, #ffb700 100%);
+  --error-gradient: linear-gradient(135deg, #ff3b3b 0%, #dc2626 100%);
   
-  /* Shadows with new color scheme */
+  /* Shadows */
   --card-shadow: 0 4px 6px -1px rgba(255, 215, 0, 0.1), 0 2px 4px -1px rgba(255, 215, 0, 0.06);
   --card-shadow-hover: 0 10px 15px -3px rgba(255, 215, 0, 0.15), 0 4px 6px -2px rgba(255, 215, 0, 0.1);
+  
+  /* Border colors */
+  --border-color: rgba(255, 215, 0, 0.1);
+  --border-hover: rgba(255, 215, 0, 0.2);
 }
 
 * {
@@ -33,6 +68,14 @@ body {
   background: var(--background);
   color: var(--text-primary);
   min-height: 100vh;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* Smooth theme transitions for all elements */
+*,
+*::before,
+*::after {
+  transition: background-color 0.3s ease, border-color 0.3s ease;
 }
 
 /* Dashboard styles */
@@ -78,13 +121,13 @@ body {
   padding: 1.5rem;
   box-shadow: var(--card-shadow);
   transition: all 0.3s ease;
-  border: 1px solid rgba(255, 215, 0, 0.1);  /* Subtle yellow border */
+  border: 1px solid var(--border-color);
 }
 
 .stat-card:hover {
   transform: translateY(-2px);
   box-shadow: var(--card-shadow-hover);
-  border-color: rgba(255, 215, 0, 0.2);  /* Brighter yellow border on hover */
+  border-color: var(--border-hover);
 }
 
 .stat-label {
@@ -121,12 +164,12 @@ body {
   border-radius: 1rem;
   box-shadow: var(--card-shadow);
   overflow: hidden;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid var(--border-color);
 }
 
 .transactions-header {
   padding: 1.5rem;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  border-bottom: 1px solid var(--border-color);
 }
 
 .transactions-table {
@@ -147,19 +190,19 @@ body {
 
 .transactions-table td {
   padding: 1rem 1.5rem;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  border-bottom: 1px solid var(--border-color);
 }
 
 .transactions-table tr:hover td {
   background-color: var(--surface-hover);
-  border-bottom: 1px solid var(--accent);  /* Yellow accent on hover */
+  border-bottom: 1px solid var(--accent);
 }
 
 /* Form styles */
 input:focus {
   outline: none;
   border-color: var(--accent);
-  box-shadow: 0 0 0 2px rgba(255, 215, 0, 0.2);
+  box-shadow: 0 0 0 2px var(--border-hover);
 }
 
 button:hover {
