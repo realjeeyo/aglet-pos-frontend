@@ -18,6 +18,11 @@ import Products from "./pages/Products";
 import Settings from "./pages/Settings";
 import Checkout from './pages/Checkout';
 
+/**
+ * Main App component with routing and sidebar navigation
+ * Manages theme state and navigation menu
+ * @returns {JSX.Element} Main application layout
+ */
 function App() {
   const [isExpanded, setIsExpanded] = useState(false);
   const { theme, toggleTheme } = useTheme();
@@ -53,6 +58,7 @@ function App() {
             </div>
 
             <div className="mt-6 flex-1">
+              {/* eslint-disable-next-line no-unused-vars */}
               {navItems.map(({ path, name, icon: Icon }) => (
                 <Link
                   key={path}

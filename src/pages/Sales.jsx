@@ -7,6 +7,11 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 
 const API_URL = "http://localhost:3000/api";
 
+/**
+ * Sales component displays transaction history with pagination
+ * Supports 5, 10, and custom page sizes
+ * @returns {JSX.Element} Sales history page with pagination controls
+ */
 export default function Sales() {
   const [sales, setSales] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -22,13 +27,15 @@ export default function Sales() {
   const fetchSales = async () => {
     try {
       const res = await fetch(`${API_URL}/sales/report`);
-      if (!res.ok) throw new Error('Failed to fetch sales data');
+      if (!res.ok) {
+        throw new Error(`Failed to fetch sales data: ${res.status} ${res.statusText}`);
+      }
       
       const data = await res.json();
       setSales(data);
       setError(null);
     } catch (err) {
-      setError(err.message);
+      setError(err.message || 'An unexpected error occurred');
     } finally {
       setLoading(false);
     }

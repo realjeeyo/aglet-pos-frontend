@@ -4,6 +4,10 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 
 const API_URL = "http://localhost:3000/api";
 
+/**
+ * Dashboard component displays overview statistics and recent transactions
+ * @returns {JSX.Element} Dashboard page with stats and transaction history
+ */
 export default function Dashboard() {
   const [stats, setStats] = useState({
     totalSales: 0,
@@ -21,12 +25,14 @@ export default function Dashboard() {
   const fetchDashboardStats = async () => {
     try {
       const res = await fetch(`${API_URL}/sales/dashboard-stats`);
-      if (!res.ok) throw new Error("Failed to fetch dashboard stats");
+      if (!res.ok) {
+        throw new Error(`Failed to fetch dashboard stats: ${res.status} ${res.statusText}`);
+      }
       const data = await res.json();
       setStats(data);
       setError(null);
     } catch (err) {
-      setError(err.message);
+      setError(err.message || 'An unexpected error occurred');
     } finally {
       setLoading(false);
     }

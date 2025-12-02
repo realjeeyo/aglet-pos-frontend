@@ -1,5 +1,9 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
+/**
+ * Settings component for application configuration
+ * @returns {JSX.Element} Settings page
+ */
 export default function Settings() {
   return (
     <div className="p-6 space-y-6">

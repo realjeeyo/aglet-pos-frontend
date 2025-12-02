@@ -1,7 +1,15 @@
 import { createContext, useContext, useState, useEffect } from 'react';
+import PropTypes from 'prop-types';
 
 const ThemeContext = createContext();
 
+/**
+ * ThemeProvider component manages light/dark theme state
+ * Persists theme preference to localStorage
+ * @param {Object} props - Component props
+ * @param {React.ReactNode} props.children - Child components
+ * @returns {JSX.Element} Theme context provider
+ */
 export const ThemeProvider = ({ children }) => {
   const [theme, setTheme] = useState(() => {
     const savedTheme = localStorage.getItem('theme');
@@ -26,6 +34,16 @@ export const ThemeProvider = ({ children }) => {
   );
 };
 
+ThemeProvider.propTypes = {
+  children: PropTypes.node.isRequired,
+};
+
+/**
+ * Custom hook to access theme context
+ * Must be used within ThemeProvider
+ * @returns {{theme: string, toggleTheme: Function}} Theme state and toggle function
+ * @throws {Error} If used outside ThemeProvider
+ */
 export const useTheme = () => {
   const context = useContext(ThemeContext);
   if (!context) {

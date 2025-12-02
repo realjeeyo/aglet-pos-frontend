@@ -6,6 +6,11 @@ import { Plus, Minus, Trash2 } from "lucide-react";
 
 const API_URL = "http://localhost:3000/api";
 
+/**
+ * Checkout component handles product selection and cart management
+ * Processes sales transactions
+ * @returns {JSX.Element} Checkout page with product grid and cart
+ */
 export default function Checkout() {
   const [shoes, setShoes] = useState([]);
   const [cart, setCart] = useState([]);
@@ -19,11 +24,14 @@ export default function Checkout() {
   const fetchShoes = async () => {
     try {
       const res = await fetch(`${API_URL}/shoes`);
+      if (!res.ok) {
+        throw new Error(`Failed to load products: ${res.status} ${res.statusText}`);
+      }
       const data = await res.json();
       setShoes(data);
       setError(null);
     } catch (err) {
-      setError('Failed to load products');
+      setError(err.message || 'Failed to load products');
     }
   };
 
@@ -89,14 +97,16 @@ export default function Checkout() {
         body: JSON.stringify({ items: cart })
       });
 
-      if (!res.ok) throw new Error('Checkout failed');
+      if (!res.ok) {
+        throw new Error(`Checkout failed: ${res.status} ${res.statusText}`);
+      }
 
       await fetchShoes();
       setCart([]);
       setError(null);
-      alert('Sale completed successfully!');
+      window.alert('Sale completed successfully!');
     } catch (err) {
-      setError(err.message);
+      setError(err.message || 'An unexpected error occurred during checkout');
     } finally {
       setLoading(false);
     }

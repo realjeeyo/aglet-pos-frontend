@@ -6,6 +6,11 @@ import { Edit, Trash2 } from "lucide-react";
 
 const API_URL = "http://localhost:3000/api";
 
+/**
+ * Products component manages shoe inventory
+ * Supports CRUD operations for shoe products
+ * @returns {JSX.Element} Product management page
+ */
 export default function Products() {
   const [shoes, setShoes] = useState([]);
   const [editingId, setEditingId] = useState(null);
@@ -26,10 +31,14 @@ export default function Products() {
   const fetchShoes = async () => {
     try {
       const res = await fetch(`${API_URL}/shoes`);
+      if (!res.ok) {
+        throw new Error(`Failed to fetch products: ${res.status} ${res.statusText}`);
+      }
       const data = await res.json();
       setShoes(data);
+      setError(null);
     } catch (err) {
-      setError(err.message);
+      setError(err.message || 'An unexpected error occurred');
     }
   };
 
@@ -50,12 +59,15 @@ export default function Products() {
         body: JSON.stringify(form),
       });
 
-      if (!res.ok) throw new Error("Failed to save product");
+      if (!res.ok) {
+        throw new Error(`Failed to save product: ${res.status} ${res.statusText}`);
+      }
 
       await fetchShoes();
       resetForm();
+      setError(null);
     } catch (err) {
-      setError(err.message);
+      setError(err.message || 'An unexpected error occurred');
     }
   };
 
@@ -65,18 +77,21 @@ export default function Products() {
   };
 
   const handleDelete = async (id) => {
-    if (!confirm("Are you sure you want to delete this product?")) return;
+    if (!window.confirm("Are you sure you want to delete this product?")) return;
 
     try {
       const res = await fetch(`${API_URL}/shoes/${id}`, {
         method: "DELETE",
       });
 
-      if (!res.ok) throw new Error("Failed to delete product");
+      if (!res.ok) {
+        throw new Error(`Failed to delete product: ${res.status} ${res.statusText}`);
+      }
 
       await fetchShoes();
+      setError(null);
     } catch (err) {
-      setError(err.message);
+      setError(err.message || 'An unexpected error occurred');
     }
   };
 
