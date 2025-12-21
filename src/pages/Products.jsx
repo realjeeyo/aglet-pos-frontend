@@ -1,271 +1,202 @@
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Edit, Trash2 } from "lucide-react";
+import { RefreshCw } from "lucide-react";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 
 const API_URL = "http://localhost:3000/api";
+const WS_URL = "ws://localhost:3000/ws";
 
 /**
- * Products component manages shoe inventory
- * Supports CRUD operations for shoe products
- * @returns {JSX.Element} Product management page
+ * Products component displays shoe inventory from IMS (read-only)
+ * @returns {JSX.Element} Product display page
  */
 export default function Products() {
   const [shoes, setShoes] = useState([]);
-  const [editingId, setEditingId] = useState(null);
-  const [form, setForm] = useState({
-    brand: "",
-    model: "",
-    colorway: "",
-    size: "",
-    condition: "New",
-    price: "",
-    currentStock: "",
-    purchasePrice: "",
-  });
-  const [error, setError] = useState(null);
+  const [notification, setNotification] = useState({ show: false, message: '', type: 'info' });
+  const [ws, setWs] = useState(null);
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
   useEffect(() => {
     fetchShoes();
+    connectWebSocket();
+
+    return () => {
+      if (ws) {
+        ws.close();
+      }
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const fetchShoes = async () => {
+  const showNotification = (message, type = 'info') => {
+    setNotification({ show: true, message, type });
+    setTimeout(() => {
+      setNotification({ show: false, message: '', type: 'info' });
+    }, 5000);
+  };
+
+  const connectWebSocket = () => {
+    const websocket = new WebSocket(WS_URL);
+
+    websocket.onopen = () => {
+      console.log('[WS] Connected to inventory updates');
+    };
+
+    websocket.onmessage = (event) => {
+      try {
+        const message = JSON.parse(event.data);
+        console.log('[WS] Received:', message);
+        
+        // Refresh inventory when stock changes
+        if (message.type === 'stock_changed' || message.type === 'shoe_added') {
+          fetchShoes();
+          if (message.type === 'shoe_added') {
+            showNotification('New product added to inventory', 'success');
+          }
+        }
+      } catch (error) {
+        console.error('[WS] Error parsing message:', error);
+      }
+    };
+
+    websocket.onerror = (error) => {
+      console.error('[WS] Error:', error);
+    };
+
+    websocket.onclose = () => {
+      console.log('[WS] Disconnected, reconnecting in 5s...');
+      setTimeout(connectWebSocket, 5000);
+    };
+
+    setWs(websocket);
+  };
+
+  const fetchShoes = async (showLoading = false) => {
     try {
+      if (showLoading) setIsRefreshing(true);
       const res = await fetch(`${API_URL}/shoes`);
       if (!res.ok) {
         throw new Error(`Failed to fetch products: ${res.status} ${res.statusText}`);
       }
       const data = await res.json();
       setShoes(data);
-      setError(null);
+      if (showLoading) showNotification('Inventory refreshed', 'success');
     } catch (err) {
-      setError(err.message || 'An unexpected error occurred');
+      showNotification(err.message || 'Failed to load products', 'error');
+    } finally {
+      if (showLoading) setIsRefreshing(false);
     }
   };
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setForm({ ...form, [name]: value });
+  const handleRefresh = () => {
+    fetchShoes(true);
   };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    try {
-      const method = editingId ? "PUT" : "POST";
-      const url = editingId ? `${API_URL}/shoes/${editingId}` : `${API_URL}/shoes`;
-
-      const res = await fetch(url, {
-        method,
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form),
-      });
-
-      if (!res.ok) {
-        throw new Error(`Failed to save product: ${res.status} ${res.statusText}`);
-      }
-
-      await fetchShoes();
-      resetForm();
-      setError(null);
-    } catch (err) {
-      setError(err.message || 'An unexpected error occurred');
-    }
-  };
-
-  const handleEdit = (shoe) => {
-    setEditingId(shoe.id);
-    setForm(shoe);
-  };
-
-  const handleDelete = async (id) => {
-    if (!window.confirm("Are you sure you want to delete this product?")) return;
-
-    try {
-      const res = await fetch(`${API_URL}/shoes/${id}`, {
-        method: "DELETE",
-      });
-
-      if (!res.ok) {
-        throw new Error(`Failed to delete product: ${res.status} ${res.statusText}`);
-      }
-
-      await fetchShoes();
-      setError(null);
-    } catch (err) {
-      setError(err.message || 'An unexpected error occurred');
-    }
-  };
-
-  const resetForm = () => {
-    setEditingId(null);
-    setForm({
-      brand: "",
-      model: "",
-      colorway: "",
-      size: "",
-      condition: "New",
-      price: "",
-      currentStock: "",
-      purchasePrice: "",
-    });
-  };
-
-  if (error) return <div className="p-6 text-[var(--color-destructive)]">Error: {error}</div>;
 
   return (
     <div className="p-6 space-y-6">
-      <h1 className="text-3xl font-bold text-[var(--color-primary)]">Product Management</h1>
+      {/* Notification Badge */}
+      {notification.show && (
+        <div 
+          className={`fixed top-6 right-6 z-50 px-6 py-4 rounded-lg shadow-lg transition-opacity duration-500 ${
+            notification.type === 'success' 
+              ? 'bg-green-600 text-white' 
+              : notification.type === 'error'
+              ? 'bg-red-600 text-white'
+              : 'bg-blue-600 text-white'
+          }`}
+          style={{ animation: 'slideIn 0.3s ease-out' }}
+        >
+          <p className="font-medium">{notification.message}</p>
+        </div>
+      )}
 
-      {/* Product Form Card */}
+      <style>{`
+        @keyframes slideIn {
+          from {
+            transform: translateX(100%);
+            opacity: 0;
+          }
+          to {
+            transform: translateX(0);
+            opacity: 1;
+          }
+        }
+      `}</style>
+
+      <div className="flex justify-between items-center">
+        <div>
+          <h1 className="text-3xl font-bold text-[var(--color-primary)]">Product Inventory</h1>
+          <p className="text-[var(--color-muted-foreground)]">
+            Data fetched from Inventory Management System (IMS) via WebSocket.
+          </p>
+        </div>
+        <Button 
+          onClick={handleRefresh} 
+          disabled={isRefreshing}
+          variant="outline"
+          className="flex items-center gap-2"
+        >
+          <RefreshCw size={16} className={isRefreshing ? 'animate-spin' : ''} />
+          {isRefreshing ? 'Refreshing...' : 'Refresh'}
+        </Button>
+      </div>
+
+      {/* Products Table */}
       <Card>
         <CardHeader>
-          <CardTitle>{editingId ? 'Edit Product' : 'Add New Product'}</CardTitle>
+          <CardTitle>All Products ({shoes.length})</CardTitle>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Brand</label>
-                <Input
-                  type="text"
-                  name="brand"
-                  value={form.brand}
-                  onChange={handleChange}
-                  required
-                />
-              </div>
-
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Model</label>
-                <Input
-                  type="text"
-                  name="model"
-                  value={form.model}
-                  onChange={handleChange}
-                  required
-                />
-              </div>
-
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Colorway</label>
-                <Input
-                  type="text"
-                  name="colorway"
-                  value={form.colorway}
-                  onChange={handleChange}
-                  required
-                />
-              </div>
-
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Size</label>
-                <Input
-                  type="text"
-                  name="size"
-                  value={form.size}
-                  onChange={handleChange}
-                  required
-                />
-              </div>
-
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Condition</label>
-                <select
-                  name="condition"
-                  value={form.condition}
-                  onChange={handleChange}
-                  className="flex h-10 w-full rounded-md border border-[var(--color-border)] bg-[var(--color-background)] px-3 py-2 text-sm"
-                  required
-                >
-                  <option value="New">New</option>
-                  <option value="Like New">Like New</option>
-                  <option value="Used">Used</option>
-                </select>
-              </div>
-
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Unit Price</label>
-                <Input
-                  type="number"
-                  name="purchasePrice"
-                  value={form.purchasePrice}
-                  onChange={handleChange}
-                  required
-                  step="0.01"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Current Stock</label>
-                <Input
-                  type="number"
-                  name="currentStock"
-                  value={form.currentStock}
-                  onChange={handleChange}
-                  required
-                />
-              </div>
-
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Selling Price</label>
-                <Input
-                  type="number"
-                  name="price"
-                  value={form.price}
-                  onChange={handleChange}
-                  required
-                  step="0.01"
-                />
-              </div>
-            </div>
-
-            <div className="flex gap-3">
-              <Button type="submit">
-                {editingId ? 'Update Product' : 'Add Product'}
-              </Button>
-              {editingId && (
-                <Button type="button" variant="outline" onClick={resetForm}>
-                  Cancel
-                </Button>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Brand</TableHead>
+                <TableHead>Model</TableHead>
+                <TableHead>Colorway</TableHead>
+                <TableHead>Size</TableHead>
+                <TableHead>Condition</TableHead>
+                <TableHead className="text-right">Unit Price</TableHead>
+                <TableHead className="text-right">Selling Price</TableHead>
+                <TableHead className="text-right">Stock</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {shoes.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={8} className="text-center py-8 text-[var(--color-muted-foreground)]">
+                    No products available
+                  </TableCell>
+                </TableRow>
+              ) : (
+                shoes.map(shoe => (
+                  <TableRow key={shoe.id}>
+                    <TableCell className="font-medium">{shoe.brand}</TableCell>
+                    <TableCell>{shoe.model}</TableCell>
+                    <TableCell>{shoe.colorway}</TableCell>
+                    <TableCell>{shoe.size}</TableCell>
+                    <TableCell>{shoe.condition}</TableCell>
+                    <TableCell className="text-right">₱{Number(shoe.purchasePrice).toFixed(2)}</TableCell>
+                    <TableCell className="text-right font-semibold">₱{Number(shoe.price).toFixed(2)}</TableCell>
+                    <TableCell className={`text-right font-semibold ${
+                      shoe.currentStock < 5 ? 'text-[var(--color-destructive)]' : 'text-[var(--color-primary)]'
+                    }`}>
+                      {shoe.currentStock}
+                    </TableCell>
+                  </TableRow>
+                ))
               )}
-            </div>
-          </form>
+            </TableBody>
+          </Table>
         </CardContent>
       </Card>
-
-      {/* Products Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {shoes.map(shoe => (
-          <Card key={shoe.id}>
-            <CardContent className="pt-6">
-              <div className="flex justify-between items-start">
-                <div className="space-y-2">
-                  <h3 className="text-xl font-bold">{shoe.brand}</h3>
-                  <p className="text-sm text-[var(--color-muted-foreground)]">{shoe.model}</p>
-                  <p className="text-sm">Colorway: {shoe.colorway}</p>
-                  <p className="text-sm">Size: {shoe.size} | Condition: {shoe.condition}</p>
-                  <div className="flex gap-2 items-center">
-                    <span className="text-sm text-[var(--color-muted-foreground)]">Cost: ₱{shoe.purchasePrice}</span>
-                    <span className="text-xl font-bold text-[var(--color-primary)]">₱{shoe.price}</span>
-                  </div>
-                  <p className={`text-sm font-semibold ${shoe.currentStock < 5 ? 'text-[var(--color-destructive)]' : 'text-[var(--color-primary)]'}`}>
-                    Stock: {shoe.currentStock}
-                  </p>
-                </div>
-                <div className="flex gap-2">
-                  <Button size="icon" variant="ghost" onClick={() => handleEdit(shoe)}>
-                    <Edit size={16} />
-                  </Button>
-                  <Button size="icon" variant="ghost" onClick={() => handleDelete(shoe.id)}>
-                    <Trash2 size={16} className="text-[var(--color-destructive)]" />
-                  </Button>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
     </div>
   );
 }
