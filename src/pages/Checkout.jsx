@@ -2,10 +2,16 @@ import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Plus, Minus, Trash2, ShoppingCart, RefreshCw } from "lucide-react";
+import { Plus, Minus, Trash2, ShoppingCart, RefreshCw, Grid3x3, List } from "lucide-react";
 
 const API_URL = "http://localhost:3000/api";
 const WS_URL = "ws://localhost:3000/ws";
+
+const formatCurrency = (amount) =>
+  new Intl.NumberFormat("en-PH", {
+    style: "currency",
+    currency: "PHP",
+  }).format(amount);
 
 /**
  * Checkout component handles product selection and cart management
@@ -18,6 +24,7 @@ export default function Checkout() {
   const [loading, setLoading] = useState(false);
   const [pageLoading, setPageLoading] = useState(true);
   const [notification, setNotification] = useState({ show: false, message: '', type: 'error' });
+  const [viewMode, setViewMode] = useState('grid'); // 'grid' or 'list'
 
   useEffect(() => {
     const fetchData = async () => {
@@ -215,37 +222,126 @@ export default function Checkout() {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Products Section */}
-        <div className="lg:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-4">
-          {shoes.map((shoe) => (
-            <Card 
-              key={shoe.id} 
-              className="hover:shadow-md transition-shadow duration-200"
+        <div className="lg:col-span-2">
+          {/* View Toggle */}
+          <div className="flex justify-end mb-4 gap-1">
+            <Button
+              variant={viewMode === 'grid' ? 'default' : 'outline'}
+              size="sm"
+              onClick={() => setViewMode('grid')}
+              className="hover:cursor-pointer"
             >
-              <CardContent className="pt-6">
-                <h3 className="font-bold text-lg mb-2 text-[var(--color-foreground)]">
-                  {shoe.brand} {shoe.model}
-                </h3>
-                <p className="text-sm text-[var(--color-muted-foreground)] mb-1">{shoe.colorway}</p>
-                <p className="text-sm mb-2">Size: {shoe.size} | {shoe.condition}</p>
-                <p className="text-xl font-bold mb-2 text-[var(--color-primary)]">
-                  ₱{shoe.price}
-                </p>
-                <p className="text-sm text-[var(--color-muted-foreground)] mb-4">
-                  Stock: <span className={shoe.currentStock < 5 ? 'text-red-500 font-semibold' : 'text-green-600 font-semibold'}>
-                    {shoe.currentStock}
-                  </span>
-                </p>
-                <Button 
-                  onClick={() => addToCart(shoe)}
-                  disabled={shoe.currentStock === 0}
-                  className="w-full hover:cursor-pointer"
-                >
-                  <Plus size={16} className="mr-2" />
-                  Add to Cart
-                </Button>
-              </CardContent>
-            </Card>
-          ))}
+              <Grid3x3 size={16} className="mr-2" />
+              Grid
+            </Button>
+            <Button
+              variant={viewMode === 'list' ? 'default' : 'outline'}
+              size="sm"
+              onClick={() => setViewMode('list')}
+              className="hover:cursor-pointer"
+            >
+              <List size={16} className="mr-2" />
+              List
+            </Button>
+          </div>
+
+          {/* Products Grid/List */}
+          <div className={viewMode === 'grid' ? 'grid grid-cols-1 md:grid-cols-2 gap-4' : 'space-y-4'}>
+            {shoes.map((shoe) => (
+              <Card 
+                key={shoe.id} 
+                className={`hover:shadow-md transition-shadow duration-200 ${viewMode === 'list' ? 'flex flex-row' : ''}`}
+              >
+                <CardContent className={`pt-6 ${viewMode === 'list' ? 'flex-1 flex items-center justify-between' : ''}`}>
+                  {viewMode === 'grid' ? (
+                    <>
+                      <h3 className="font-bold text-lg mb-2 text-[var(--color-foreground)]">
+                        {shoe.brand} {shoe.model}
+                      </h3>
+                      <p className="text-sm text-[var(--color-muted-foreground)] mb-1">{shoe.colorway}</p>
+                      <div className="flex items-center gap-2 mb-2">
+                        <p className="text-sm">Size: {shoe.size}</p>
+                        <span className="text-[var(--color-muted-foreground)]">|</span>
+                        <span className={`inline-block px-2 py-1 rounded-sm text-xs font-medium ${
+                          shoe.condition === 'New' 
+                            ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
+                            : shoe.condition === 'Like New'
+                            ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400'
+                            : 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400'
+                        }`}>
+                          {shoe.condition}
+                        </span>
+                      </div>
+                      <p className="text-xl font-bold mb-2 text-[var(--color-primary)]">
+                        {formatCurrency(shoe.price)}
+                      </p>
+                      <p className="text-sm text-[var(--color-muted-foreground)] mb-4">
+                        Stock: <span className={shoe.currentStock < 5 ? 'text-red-500 font-semibold' : 'text-green-600 font-semibold'}>
+                          {shoe.currentStock}
+                        </span>
+                      </p>
+                      <Button 
+                        onClick={() => addToCart(shoe)}
+                        disabled={shoe.currentStock === 0}
+                        className={`w-full ${
+                          shoe.currentStock === 0 
+                            ? 'bg-transparent outline-1 border-red-500 text-red-500 hover:bg-transparent' 
+                            : 'hover:cursor-pointer'
+                        }`}
+                      >
+                        <Plus size={16} className="mr-2" />
+                        Add to Cart
+                      </Button>
+                    </>
+                  ) : (
+                    <>
+                      <div className="flex items-center gap-6 flex-1">
+                        <div className="flex-1">
+                          <h3 className="font-bold text-lg text-[var(--color-foreground)]">
+                            {shoe.brand} {shoe.model}
+                          </h3>
+                          <p className="text-sm text-[var(--color-muted-foreground)]">{shoe.colorway}</p>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <p className="text-sm">Size: {shoe.size}</p>
+                          <span className="text-[var(--color-muted-foreground)]">|</span>
+                          <span className={`inline-block px-2 py-1 rounded-sm text-xs font-medium ${
+                            shoe.condition === 'New' 
+                              ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
+                              : shoe.condition === 'Like New'
+                              ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400'
+                              : 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400'
+                          }`}>
+                            {shoe.condition}
+                          </span>
+                        </div>
+                        <p className="text-xl font-bold text-[var(--color-primary)] min-w-[120px] text-right">
+                          {formatCurrency(shoe.price)}
+                        </p>
+                        <p className="text-sm text-[var(--color-muted-foreground)] min-w-[80px] text-right">
+                          Stock: <span className={shoe.currentStock < 5 ? 'text-red-500 font-semibold' : 'text-green-600 font-semibold'}>
+                            {shoe.currentStock}
+                          </span>
+                        </p>
+                        <Button 
+                          onClick={() => addToCart(shoe)}
+                          disabled={shoe.currentStock === 0}
+                          className={`min-w-[140px] ${
+                            shoe.currentStock === 0 
+                              ? 'bg-transparent border-2 border-red-500 text-red-500 hover:bg-transparent cursor-not-allowed' 
+                              : 'hover:cursor-pointer'
+                          }`}
+                        >
+                          <Plus size={16} className="mr-2" />
+                          Add to Cart
+                        </Button>
+                      </div>
+                    </>
+                  )}
+                </CardContent>
+              </Card>
+            ))}
+          </div>
         </div>
 
         {/* Cart Section */}
@@ -271,11 +367,23 @@ export default function Checkout() {
                       <div key={item.shoeId} className="pb-3 border-b border-[var(--color-border)]">
                         <div className="mb-2">
                           <p className="font-medium text-sm">{item.name}</p>
-                          <p className="text-xs text-[var(--color-muted-foreground)] mt-1">
-                            Size: {item.size} | {item.condition}
-                          </p>
+                          <div className="flex items-center gap-2 mt-1">
+                            <p className="text-xs text-[var(--color-muted-foreground)">
+                              Size: {item.size}
+                            </p>
+                            <span className="text-[var(--color-muted-foreground)] text-xs">|</span>
+                            <span className={`inline-block px-2 py-0.5 rounded-sm text-xs font-medium ${
+                              item.condition === 'New' 
+                                ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
+                                : item.condition === 'Like New'
+                                ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400'
+                                : 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400'
+                            }`}>
+                              {item.condition}
+                            </span>
+                          </div>
                           <p className="text-sm font-semibold text-[var(--color-primary)] mt-1">
-                            ₱{item.price} each
+                            {formatCurrency(item.price)} each
                           </p>
                         </div>
                         <div className="flex items-center gap-2">
@@ -320,7 +428,7 @@ export default function Checkout() {
                     <div className="flex justify-between items-center mb-4 p-3 bg-[var(--color-secondary)] rounded-lg">
                       <span className="font-medium">Total:</span>
                       <span className="text-2xl font-bold text-[var(--color-primary)]">
-                        ₱{cart.reduce((sum, item) => sum + (item.quantity * item.price), 0).toFixed(2)}
+                        {formatCurrency(cart.reduce((sum, item) => sum + (item.quantity * item.price), 0))}
                       </span>
                     </div>
                     <Button

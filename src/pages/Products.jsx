@@ -14,6 +14,12 @@ import {
 const API_URL = "http://localhost:3000/api";
 const WS_URL = "ws://localhost:3000/ws";
 
+const formatCurrency = (amount) =>
+  new Intl.NumberFormat("en-PH", {
+    style: "currency",
+    currency: "PHP",
+  }).format(amount);
+
 /**
  * Products component displays shoe inventory from IMS (read-only)
  * @returns {JSX.Element} Product display page
@@ -217,7 +223,7 @@ export default function Products() {
                       <TableCell className="text-[var(--color-muted-foreground)]">{shoe.colorway}</TableCell>
                       <TableCell>{shoe.size}</TableCell>
                       <TableCell>
-                        <span className={`inline-block px-2 py-1 rounded text-xs font-medium ${
+                        <span className={`inline-block px-2 py-1 rounded-sm text-xs font-medium ${
                           shoe.condition === 'New' 
                             ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
                             : shoe.condition === 'Like New'
@@ -228,10 +234,10 @@ export default function Products() {
                         </span>
                       </TableCell>
                       <TableCell className="text-right text-[var(--color-muted-foreground)]">
-                        ₱{Number(shoe.purchasePrice).toFixed(2)}
+                        {formatCurrency(shoe.purchasePrice)}
                       </TableCell>
                       <TableCell className="text-right font-semibold text-[var(--color-primary)]">
-                        ₱{Number(shoe.price).toFixed(2)}
+                        {formatCurrency(shoe.price)}
                       </TableCell>
                       <TableCell className="text-right">
                         <span className={`inline-block px-2 py-1 rounded text-sm font-semibold ${
