@@ -15,11 +15,19 @@ export default function Checkout() {
   const [shoes, setShoes] = useState([]);
   const [cart, setCart] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
+  const [notification, setNotification] = useState({ show: false, message: '', type: 'error' });
 
   useEffect(() => {
     fetchShoes();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  const showNotification = (message, type = 'error') => {
+    setNotification({ show: true, message, type });
+    setTimeout(() => {
+      setNotification({ show: false, message: '', type: 'error' });
+    }, 5000);
+  };
 
   const fetchShoes = async () => {
     try {
@@ -29,9 +37,8 @@ export default function Checkout() {
       }
       const data = await res.json();
       setShoes(data);
-      setError(null);
     } catch (err) {
-      setError(err.message || 'Failed to load products');
+      showNotification(err.message || 'Failed to load products', 'error');
     }
   };
 
@@ -40,7 +47,7 @@ export default function Checkout() {
     const totalQuantity = existing ? existing.quantity + 1 : 1;
 
     if (totalQuantity > shoe.currentStock) {
-      setError(`Not enough stock for ${shoe.brand} ${shoe.model}`);
+      showNotification(`Not enough stock for ${shoe.brand} ${shoe.model}`, 'error');
       return;
     }
 
@@ -61,7 +68,6 @@ export default function Checkout() {
         maxStock: shoe.currentStock
       }]);
     }
-    setError(null);
   };
 
   const updateQuantity = (shoeId, quantity) => {
@@ -69,7 +75,7 @@ export default function Checkout() {
     const newQuantity = parseInt(quantity) || 0;
 
     if (newQuantity > shoe.currentStock) {
-      setError(`Cannot exceed available stock (${shoe.currentStock} units)`);
+      showNotification(`Cannot exceed available stock (${shoe.currentStock} units)`, 'error');
       return;
     }
 
@@ -78,7 +84,6 @@ export default function Checkout() {
         ? { ...item, quantity: newQuantity }
         : item
     ));
-    setError(null);
   };
 
   const removeFromCart = (shoeId) => {
@@ -87,7 +92,7 @@ export default function Checkout() {
 
   const handleCheckout = async () => {
     if (cart.length === 0) {
-      setError('Cart is empty');
+      showNotification('Cart is empty', 'error');
       return;
     }
 
@@ -105,20 +110,42 @@ export default function Checkout() {
 
       await fetchShoes();
       setCart([]);
-      setError(null);
-      window.alert('Sale completed successfully!');
+      showNotification('Sale completed successfully!', 'success');
     } catch (err) {
-      setError(err.message || 'An unexpected error occurred during checkout');
+      showNotification(err.message || 'An unexpected error occurred during checkout', 'error');
     } finally {
       setLoading(false);
     }
   };
 
-  if (loading) return <div className="p-6">Loading...</div>;
-  if (error) return <div className="p-6 text-[var(--color-destructive)]">Error: {error}</div>;
-
   return (
     <div className="p-6 space-y-6">
+      {/* Notification Badge */}
+      {notification.show && (
+        <div 
+          className={`fixed top-6 right-6 z-50 px-6 py-4 rounded-lg shadow-lg transition-opacity duration-500 ${
+            notification.type === 'success' 
+              ? 'bg-green-600 text-white' 
+              : 'bg-red-600 text-white'
+          }`}
+          style={{ animation: 'slideIn 0.3s ease-out' }}
+        >
+          <p className="font-medium">{notification.message}</p>
+        </div>
+      )}
+
+      <style>{`
+        @keyframes slideIn {
+          from {
+            transform: translateX(100%);
+            opacity: 0;
+          }
+          to {
+            transform: translateX(0);
+            opacity: 1;
+          }
+        }
+      `}</style>
       <h1 className="text-3xl font-bold text-[var(--color-primary)]">Checkout</h1>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
