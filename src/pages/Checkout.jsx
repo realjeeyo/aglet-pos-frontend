@@ -53,7 +53,9 @@ export default function Checkout() {
     } else {
       setCart([...cart, {
         shoeId: shoe.id,
-        name: `${shoe.brand} ${shoe.model}`,
+        name: `${shoe.brand} ${shoe.model} - ${shoe.colorway}`,
+        size: shoe.size,
+        condition: shoe.condition,
         price: shoe.price,
         quantity: 1,
         maxStock: shoe.currentStock
@@ -126,6 +128,8 @@ export default function Checkout() {
             <Card key={shoe.id}>
               <CardContent className="pt-6">
                 <h3 className="text-lg font-bold">{shoe.brand} {shoe.model}</h3>
+                <p className="text-sm text-[var(--color-muted-foreground)]">{shoe.colorway}</p>
+                <p className="text-sm mt-1">Size: {shoe.size} | {shoe.condition}</p>
                 <p className="text-2xl font-bold text-[var(--color-primary)] mt-2">₱{shoe.price}</p>
                 <p className={`text-sm mt-2 font-semibold ${shoe.currentStock < 5 ? 'text-[var(--color-destructive)]' : 'text-[var(--color-primary)]'}`}>
                   Stock: {shoe.currentStock}
@@ -160,6 +164,7 @@ export default function Checkout() {
                       <div key={item.shoeId} className="pb-4 border-b border-border">
                         <div className="mb-2">
                           <p className="font-medium">{item.name}</p>
+                          <p className="text-xs text-[var(--color-muted-foreground)]">Size: {item.size} | {item.condition}</p>
                           <p className="text-sm text-[var(--color-primary)]">₱{item.price} each</p>
                         </div>
                         <div className="flex items-center gap-2">

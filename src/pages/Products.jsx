@@ -17,7 +17,9 @@ export default function Products() {
   const [form, setForm] = useState({
     brand: "",
     model: "",
+    colorway: "",
     size: "",
+    condition: "New",
     price: "",
     currentStock: "",
     purchasePrice: "",
@@ -100,7 +102,9 @@ export default function Products() {
     setForm({
       brand: "",
       model: "",
+      colorway: "",
       size: "",
+      condition: "New",
       price: "",
       currentStock: "",
       purchasePrice: "",
@@ -144,9 +148,20 @@ export default function Products() {
               </div>
 
               <div className="space-y-2">
+                <label className="text-sm font-medium">Colorway</label>
+                <Input
+                  type="text"
+                  name="colorway"
+                  value={form.colorway}
+                  onChange={handleChange}
+                  required
+                />
+              </div>
+
+              <div className="space-y-2">
                 <label className="text-sm font-medium">Size</label>
                 <Input
-                  type="number"
+                  type="text"
                   name="size"
                   value={form.size}
                   onChange={handleChange}
@@ -155,13 +170,29 @@ export default function Products() {
               </div>
 
               <div className="space-y-2">
-                <label className="text-sm font-medium">Price</label>
+                <label className="text-sm font-medium">Condition</label>
+                <select
+                  name="condition"
+                  value={form.condition}
+                  onChange={handleChange}
+                  className="flex h-10 w-full rounded-md border border-[var(--color-border)] bg-[var(--color-background)] px-3 py-2 text-sm"
+                  required
+                >
+                  <option value="New">New</option>
+                  <option value="Like New">Like New</option>
+                  <option value="Used">Used</option>
+                </select>
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Unit Price</label>
                 <Input
                   type="number"
-                  name="price"
-                  value={form.price}
+                  name="purchasePrice"
+                  value={form.purchasePrice}
                   onChange={handleChange}
                   required
+                  step="0.01"
                 />
               </div>
 
@@ -177,13 +208,14 @@ export default function Products() {
               </div>
 
               <div className="space-y-2">
-                <label className="text-sm font-medium">Purchase Price</label>
+                <label className="text-sm font-medium">Selling Price</label>
                 <Input
                   type="number"
-                  name="purchasePrice"
-                  value={form.purchasePrice}
+                  name="price"
+                  value={form.price}
                   onChange={handleChange}
                   required
+                  step="0.01"
                 />
               </div>
             </div>
@@ -211,8 +243,12 @@ export default function Products() {
                 <div className="space-y-2">
                   <h3 className="text-xl font-bold">{shoe.brand}</h3>
                   <p className="text-sm text-[var(--color-muted-foreground)]">{shoe.model}</p>
-                  <p className="text-sm">Size: {shoe.size}</p>
-                  <p className="text-2xl font-bold text-[var(--color-primary)]">₱{shoe.price}</p>
+                  <p className="text-sm">Colorway: {shoe.colorway}</p>
+                  <p className="text-sm">Size: {shoe.size} | Condition: {shoe.condition}</p>
+                  <div className="flex gap-2 items-center">
+                    <span className="text-sm text-[var(--color-muted-foreground)]">Cost: ₱{shoe.purchasePrice}</span>
+                    <span className="text-xl font-bold text-[var(--color-primary)]">₱{shoe.price}</span>
+                  </div>
                   <p className={`text-sm font-semibold ${shoe.currentStock < 5 ? 'text-[var(--color-destructive)]' : 'text-[var(--color-primary)]'}`}>
                     Stock: {shoe.currentStock}
                   </p>
