@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { RefreshCw, Package } from "lucide-react";
+import { useTheme } from "@/context/ThemeContext";
 import {
   Table,
   TableBody,
@@ -29,6 +30,37 @@ export default function Products() {
   const [loading, setLoading] = useState(true);
   const [notification, setNotification] = useState({ show: false, message: '', type: 'info' });
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const { theme } = useTheme();
+
+  const getConditionBadgeClass = (condition) => {
+    const isDark = theme === 'dark';
+    if (condition === 'New') {
+      return isDark 
+        ? 'bg-green-900/30 text-green-400' 
+        : 'bg-green-400 text-white';
+    } else if (condition === 'Like New') {
+      return isDark 
+        ? 'bg-blue-900/30 text-blue-400' 
+        : 'bg-blue-400 text-white';
+    } else {
+      return isDark 
+        ? 'bg-yellow-900/30 text-yellow-400' 
+        : 'bg-yellow-400 text-white';
+    }
+  };
+
+  const getStockBadgeClass = (stock) => {
+    const isDark = theme === 'dark';
+    if (stock < 5) {
+      return isDark 
+        ? 'bg-red-900/30 text-red-400' 
+        : 'bg-neutral-100 text-red-700';
+    } else {
+      return isDark 
+        ? 'bg-green-900/30 text-green-400' 
+        : 'bg-neutral-100 text-green-500';
+    }
+  };
 
   useEffect(() => {
     const fetchData = async () => {
@@ -223,13 +255,7 @@ export default function Products() {
                       <TableCell className="text-[var(--color-muted-foreground)]">{shoe.colorway}</TableCell>
                       <TableCell>{shoe.size}</TableCell>
                       <TableCell>
-                        <span className={`inline-block px-2 py-1 rounded-sm text-xs font-medium ${
-                          shoe.condition === 'New' 
-                            ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
-                            : shoe.condition === 'Like New'
-                            ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400'
-                            : 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400'
-                        }`}>
+                        <span className={`inline-block px-2 py-1 rounded-sm text-xs font-medium ${getConditionBadgeClass(shoe.condition)}`}>
                           {shoe.condition}
                         </span>
                       </TableCell>
@@ -240,11 +266,7 @@ export default function Products() {
                         {formatCurrency(shoe.price)}
                       </TableCell>
                       <TableCell className="text-right">
-                        <span className={`inline-block px-2 py-1 rounded text-sm font-semibold ${
-                          shoe.currentStock < 5 
-                            ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400' 
-                            : 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
-                        }`}>
+                        <span className={`inline-block px-2 py-1 rounded text-sm font-semibold ${getStockBadgeClass(shoe.currentStock)}`}>
                           {shoe.currentStock}
                         </span>
                       </TableCell>

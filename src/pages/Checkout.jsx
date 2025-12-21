@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Plus, Minus, Trash2, ShoppingCart, RefreshCw, Grid3x3, List } from "lucide-react";
+import { useTheme } from "@/context/ThemeContext";
 
 const API_URL = "http://localhost:3000/api";
 const WS_URL = "ws://localhost:3000/ws";
@@ -25,6 +26,24 @@ export default function Checkout() {
   const [pageLoading, setPageLoading] = useState(true);
   const [notification, setNotification] = useState({ show: false, message: '', type: 'error' });
   const [viewMode, setViewMode] = useState('grid'); // 'grid' or 'list'
+  const { theme } = useTheme();
+
+  const getConditionBadgeClass = (condition) => {
+    const isDark = theme === 'dark';
+    if (condition === 'New') {
+      return isDark 
+        ? 'bg-green-900/30 text-green-400' 
+        : 'bg-green-400 text-white';
+    } else if (condition === 'Like New') {
+      return isDark 
+        ? 'bg-blue-900/30 text-blue-400' 
+        : 'bg-blue-400 text-white';
+    } else {
+      return isDark 
+        ? 'bg-yellow-900/30 text-yellow-400' 
+        : 'bg-yellow-400 text-white';
+    }
+  };
 
   useEffect(() => {
     const fetchData = async () => {
@@ -262,13 +281,7 @@ export default function Checkout() {
                       <div className="flex items-center gap-2 mb-2">
                         <p className="text-sm">Size: {shoe.size}</p>
                         <span className="text-[var(--color-muted-foreground)]">|</span>
-                        <span className={`inline-block px-2 py-1 rounded-sm text-xs font-medium ${
-                          shoe.condition === 'New' 
-                            ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
-                            : shoe.condition === 'Like New'
-                            ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400'
-                            : 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400'
-                        }`}>
+                        <span className={`inline-block px-2 py-1 rounded-sm text-xs font-medium ${getConditionBadgeClass(shoe.condition)}`}>
                           {shoe.condition}
                         </span>
                       </div>
@@ -305,13 +318,7 @@ export default function Checkout() {
                         <div className="flex items-center gap-2">
                           <p className="text-sm">Size: {shoe.size}</p>
                           <span className="text-[var(--color-muted-foreground)]">|</span>
-                          <span className={`inline-block px-2 py-1 rounded-sm text-xs font-medium ${
-                            shoe.condition === 'New' 
-                              ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
-                              : shoe.condition === 'Like New'
-                              ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400'
-                              : 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400'
-                          }`}>
+                          <span className={`inline-block px-2 py-1 rounded-sm text-xs font-medium ${getConditionBadgeClass(shoe.condition)}`}>
                             {shoe.condition}
                           </span>
                         </div>
@@ -328,7 +335,7 @@ export default function Checkout() {
                           disabled={shoe.currentStock === 0}
                           className={`min-w-[140px] ${
                             shoe.currentStock === 0 
-                              ? 'bg-transparent border-2 border-red-500 text-red-500 hover:bg-transparent cursor-not-allowed' 
+                              ? 'bg-transparent outline-1 border-red-500 text-red-500 hover:bg-transparent cursor-not-allowed' 
                               : 'hover:cursor-pointer'
                           }`}
                         >
@@ -372,13 +379,7 @@ export default function Checkout() {
                               Size: {item.size}
                             </p>
                             <span className="text-[var(--color-muted-foreground)] text-xs">|</span>
-                            <span className={`inline-block px-2 py-0.5 rounded-sm text-xs font-medium ${
-                              item.condition === 'New' 
-                                ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
-                                : item.condition === 'Like New'
-                                ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400'
-                                : 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400'
-                            }`}>
+                            <span className={`inline-block px-2 py-0.5 rounded-sm text-xs font-medium ${getConditionBadgeClass(item.condition)}`}>
                               {item.condition}
                             </span>
                           </div>
