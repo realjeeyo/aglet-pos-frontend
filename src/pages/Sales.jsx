@@ -96,7 +96,7 @@ export default function Sales() {
   return (
     <div className="p-6 space-y-6">
       <div className="flex justify-between items-center">
-        <h1 className="text-3xl font-bold text-[var(--color-primary)]">Sales History</h1>
+        <h1 className="text-2xl font-bold text-[var(--color-foreground)]">Sales History</h1>
         
         {/* Pagination Controls */}
         <div className="flex items-center gap-4">
@@ -106,13 +106,15 @@ export default function Sales() {
               variant={pageSize === 5 ? "default" : "outline"}
               size="sm"
               onClick={() => handlePageSizeChange(5)}
-            >
+              className="hover:cursor-pointer"
+              >
               5
             </Button>
             <Button
               variant={pageSize === 10 ? "default" : "outline"}
               size="sm"
               onClick={() => handlePageSizeChange(10)}
+              className="hover:cursor-pointer"
             >
               10
             </Button>
@@ -132,6 +134,7 @@ export default function Sales() {
                 size="sm"
                 onClick={handleCustomPageSize}
                 disabled={!customPageSize}
+                className="hover:cursor-pointer"
               >
                 Set
               </Button>
@@ -191,7 +194,8 @@ export default function Sales() {
                 size="sm"
                 onClick={() => goToPage(currentPage - 1)}
                 disabled={currentPage === 1}
-              >
+                className="hover:cursor-pointer"
+                >
                 <ChevronLeft size={16} className="mr-1" />
                 Previous
               </Button>
@@ -207,6 +211,7 @@ export default function Sales() {
                 size="sm"
                 onClick={() => goToPage(currentPage + 1)}
                 disabled={currentPage === totalPages}
+                className="hover:cursor-pointer"
               >
                 Next
                 <ChevronRight size={16} className="ml-1" />

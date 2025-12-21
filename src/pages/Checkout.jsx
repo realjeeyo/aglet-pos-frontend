@@ -2,9 +2,10 @@ import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Plus, Minus, Trash2 } from "lucide-react";
+import { Plus, Minus, Trash2, ShoppingCart, RefreshCw } from "lucide-react";
 
 const API_URL = "http://localhost:3000/api";
+const WS_URL = "ws://localhost:3000/ws";
 
 /**
  * Checkout component handles product selection and cart management
@@ -15,12 +16,64 @@ export default function Checkout() {
   const [shoes, setShoes] = useState([]);
   const [cart, setCart] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [pageLoading, setPageLoading] = useState(true);
   const [notification, setNotification] = useState({ show: false, message: '', type: 'error' });
 
   useEffect(() => {
-    fetchShoes();
+    const fetchData = async () => {
+      try {
+        const res = await fetch(`${API_URL}/shoes`);
+        if (!res.ok) throw new Error(`Failed to load products`);
+        const data = await res.json();
+        setShoes(data);
+      } catch (err) {
+        setNotification({ show: true, message: err.message || 'Failed to load products', type: 'error' });
+        setTimeout(() => setNotification({ show: false, message: '', type: 'error' }), 5000);
+      } finally {
+        setPageLoading(false);
+      }
+    };
+
+    fetchData();
+    const websocket = connectWebSocket();
+
+    return () => {
+      if (websocket) websocket.close();
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  const connectWebSocket = () => {
+    const websocket = new WebSocket(WS_URL);
+
+    websocket.onopen = () => {
+      console.log('[WS-Checkout] Connected to inventory updates');
+    };
+
+    websocket.onmessage = (event) => {
+      try {
+        const message = JSON.parse(event.data);
+        console.log('[WS-Checkout] Received:', message);
+        
+        if (message.type === 'stock_changed' || message.type === 'stock_updated' || message.type === 'shoe_added' || message.type === 'shoe_updated') {
+          fetchShoes(false);
+        }
+      } catch (error) {
+        console.error('[WS-Checkout] Error parsing message:', error);
+      }
+    };
+
+    websocket.onerror = (error) => {
+      console.error('[WS-Checkout] Error:', error);
+    };
+
+    websocket.onclose = () => {
+      console.log('[WS-Checkout] Disconnected, reconnecting in 5s...');
+      setTimeout(connectWebSocket, 5000);
+    };
+
+    return websocket;
+  };
 
   const showNotification = (message, type = 'error') => {
     setNotification({ show: true, message, type });
@@ -29,7 +82,7 @@ export default function Checkout() {
     }, 5000);
   };
 
-  const fetchShoes = async () => {
+  const fetchShoes = async (initialLoad = false) => {
     try {
       const res = await fetch(`${API_URL}/shoes`);
       if (!res.ok) {
@@ -39,6 +92,10 @@ export default function Checkout() {
       setShoes(data);
     } catch (err) {
       showNotification(err.message || 'Failed to load products', 'error');
+    } finally {
+      if (initialLoad) {
+        setPageLoading(false);
+      }
     }
   };
 
@@ -108,7 +165,7 @@ export default function Checkout() {
         throw new Error(`Checkout failed: ${res.status} ${res.statusText}`);
       }
 
-      await fetchShoes();
+      await fetchShoes(false);
       setCart([]);
       showNotification('Sale completed successfully!', 'success');
     } catch (err) {
@@ -118,15 +175,26 @@ export default function Checkout() {
     }
   };
 
+  if (pageLoading) {
+    return (
+      <div className="p-6 flex items-center justify-center min-h-[400px]">
+        <div className="text-center">
+          <RefreshCw size={48} className="mx-auto mb-4 animate-spin text-[var(--color-primary)]" />
+          <p className="text-[var(--color-muted-foreground)]">Loading products...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="p-6 space-y-6">
       {/* Notification Badge */}
       {notification.show && (
         <div 
-          className={`fixed top-6 right-6 z-50 px-6 py-4 rounded-lg shadow-lg transition-opacity duration-500 ${
+          className={`fixed top-6 right-6 z-50 px-5 py-3 rounded-lg shadow-lg transition-all duration-300 ${
             notification.type === 'success' 
-              ? 'bg-green-600 text-white' 
-              : 'bg-red-600 text-white'
+              ? 'bg-green-500 text-white' 
+              : 'bg-red-500 text-white'
           }`}
           style={{ animation: 'slideIn 0.3s ease-out' }}
         >
@@ -136,36 +204,43 @@ export default function Checkout() {
 
       <style>{`
         @keyframes slideIn {
-          from {
-            transform: translateX(100%);
-            opacity: 0;
-          }
-          to {
-            transform: translateX(0);
-            opacity: 1;
-          }
+          from { transform: translateX(100%); opacity: 0; }
+          to { transform: translateX(0); opacity: 1; }
         }
       `}</style>
-      <h1 className="text-3xl font-bold text-[var(--color-primary)]">Checkout</h1>
+
+      <h1 className="text-2xl font-bold text-[var(--color-foreground)]">
+        Checkout
+      </h1>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Products Section */}
         <div className="lg:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-4">
-          {shoes.map(shoe => (
-            <Card key={shoe.id}>
+          {shoes.map((shoe) => (
+            <Card 
+              key={shoe.id} 
+              className="hover:shadow-md transition-shadow duration-200"
+            >
               <CardContent className="pt-6">
-                <h3 className="text-lg font-bold">{shoe.brand} {shoe.model}</h3>
-                <p className="text-sm text-[var(--color-muted-foreground)]">{shoe.colorway}</p>
-                <p className="text-sm mt-1">Size: {shoe.size} | {shoe.condition}</p>
-                <p className="text-2xl font-bold text-[var(--color-primary)] mt-2">₱{shoe.price}</p>
-                <p className={`text-sm mt-2 font-semibold ${shoe.currentStock < 5 ? 'text-[var(--color-destructive)]' : 'text-[var(--color-primary)]'}`}>
-                  Stock: {shoe.currentStock}
+                <h3 className="font-bold text-lg mb-2 text-[var(--color-foreground)]">
+                  {shoe.brand} {shoe.model}
+                </h3>
+                <p className="text-sm text-[var(--color-muted-foreground)] mb-1">{shoe.colorway}</p>
+                <p className="text-sm mb-2">Size: {shoe.size} | {shoe.condition}</p>
+                <p className="text-xl font-bold mb-2 text-[var(--color-primary)]">
+                  ₱{shoe.price}
                 </p>
-                <Button
+                <p className="text-sm text-[var(--color-muted-foreground)] mb-4">
+                  Stock: <span className={shoe.currentStock < 5 ? 'text-red-500 font-semibold' : 'text-green-600 font-semibold'}>
+                    {shoe.currentStock}
+                  </span>
+                </p>
+                <Button 
                   onClick={() => addToCart(shoe)}
-                  disabled={shoe.currentStock < 1 || loading}
-                  className="w-full mt-4"
+                  disabled={shoe.currentStock === 0}
+                  className="w-full hover:cursor-pointer"
                 >
+                  <Plus size={16} className="mr-2" />
                   Add to Cart
                 </Button>
               </CardContent>
@@ -176,29 +251,39 @@ export default function Checkout() {
         {/* Cart Section */}
         <div className="lg:col-span-1">
           <Card className="sticky top-4">
-            <CardHeader>
-              <CardTitle>Cart</CardTitle>
+            <CardHeader className="border-b border-[var(--color-border)]">
+              <CardTitle className="flex items-center gap-2 text-[var(--color-foreground)]">
+                <ShoppingCart size={20} />
+                Shopping Cart ({cart.length})
+              </CardTitle>
             </CardHeader>
-            <CardContent>
+            <CardContent className="pt-6">
               {cart.length === 0 ? (
                 <p className="text-center py-8 text-[var(--color-muted-foreground)]">
-                  Your cart is empty
+                  <ShoppingCart size={40} className="mx-auto mb-3 opacity-30" />
+                  <span className="block font-medium">Your cart is empty</span>
+                  <span className="block text-sm mt-1">Add products to get started</span>
                 </p>
               ) : (
                 <div className="space-y-4">
-                  <div className="space-y-4">
+                  <div className="space-y-3">
                     {cart.map(item => (
-                      <div key={item.shoeId} className="pb-4 border-b border-border">
+                      <div key={item.shoeId} className="pb-3 border-b border-[var(--color-border)]">
                         <div className="mb-2">
-                          <p className="font-medium">{item.name}</p>
-                          <p className="text-xs text-[var(--color-muted-foreground)]">Size: {item.size} | {item.condition}</p>
-                          <p className="text-sm text-[var(--color-primary)]">₱{item.price} each</p>
+                          <p className="font-medium text-sm">{item.name}</p>
+                          <p className="text-xs text-[var(--color-muted-foreground)] mt-1">
+                            Size: {item.size} | {item.condition}
+                          </p>
+                          <p className="text-sm font-semibold text-[var(--color-primary)] mt-1">
+                            ₱{item.price} each
+                          </p>
                         </div>
                         <div className="flex items-center gap-2">
                           <Button
                             size="icon"
                             variant="outline"
                             onClick={() => updateQuantity(item.shoeId, Math.max(1, item.quantity - 1))}
+                            className="hover:cursor-pointer"
                           >
                             <Minus size={16} />
                           </Button>
@@ -214,6 +299,7 @@ export default function Checkout() {
                             size="icon"
                             variant="outline"
                             onClick={() => updateQuantity(item.shoeId, Math.min(item.maxStock, item.quantity + 1))}
+                            className="hover:cursor-pointer"
                           >
                             <Plus size={16} />
                           </Button>
@@ -221,18 +307,18 @@ export default function Checkout() {
                             size="icon"
                             variant="ghost"
                             onClick={() => removeFromCart(item.shoeId)}
-                            className="ml-auto"
+                            className="ml-auto text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 hover:cursor-pointer"
                           >
-                            <Trash2 size={16} className="text-[var(--color-destructive)]" />
+                            <Trash2 size={16} />
                           </Button>
                         </div>
                       </div>
                     ))}
                   </div>
 
-                  <div className="pt-4 border-t border-border">
-                    <div className="flex justify-between items-center mb-4">
-                      <span className="text-lg font-semibold">Total:</span>
+                  <div className="pt-4 border-t border-[var(--color-border)]">
+                    <div className="flex justify-between items-center mb-4 p-3 bg-[var(--color-secondary)] rounded-lg">
+                      <span className="font-medium">Total:</span>
                       <span className="text-2xl font-bold text-[var(--color-primary)]">
                         ₱{cart.reduce((sum, item) => sum + (item.quantity * item.price), 0).toFixed(2)}
                       </span>
@@ -240,9 +326,16 @@ export default function Checkout() {
                     <Button
                       onClick={handleCheckout}
                       disabled={loading}
-                      className="w-full"
+                      className="w-full bg-green-600 hover:bg-green-700 text-white hover:cursor-pointer"
                     >
-                      {loading ? 'Processing...' : 'Checkout'}
+                      {loading ? (
+                        <span className="flex items-center gap-2">
+                          <RefreshCw size={18} className="animate-spin" />
+                          Processing...
+                        </span>
+                      ) : (
+                        'Complete Checkout'
+                      )}
                     </Button>
                   </div>
                 </div>
